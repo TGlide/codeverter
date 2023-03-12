@@ -11,7 +11,7 @@
 				/>
 			</div>
 			<div>
-				<label for="output">Input</label>
+				<label for="output">Output</label>
 				<textarea
 					name="output"
 					readonly
@@ -21,6 +21,15 @@
 				/>
 			</div>
 		</div>
-		<button class="btn mx-auto mt-8 block">Convert</button>
+
+		<div class="flex flex-col items-center mt-8 gap-4">
+			<select class="bg-black border border-solid border-white rounded-md p-1" name="" id="">
+				<option value="svelte">Svelte</option>
+				<option value="react">React</option>
+				<option value="Vue">Vue</option>
+				<option value="Angular">Angular</option>
+			</select>
+			<button class="btn mx-auto block">Convert</button>
+		</div>
 	</div>
 </main>
