@@ -34,6 +34,11 @@
 			query: (input) =>
 				`Convert the following component to a Vue 3 component, using SFCs, template tags, and <script setup>:\n${input}`
 		},
+		angular: {
+			label: 'Angular',
+			icon: 'angular',
+			query: (input) => `Convert the following component to an Angular component:\n${input}`
+		},
 		css: {
 			label: 'CSS',
 			icon: 'css',
@@ -68,6 +73,11 @@ ${input}
 			label: 'TypeScript',
 			icon: 'typescript',
 			query: (input) => `Convert the following code to TypeScript:\n${input}`
+		},
+		rust: {
+			label: 'Rust',
+			icon: 'rust',
+			query: (input) => `Convert the following code to Rust:\n${input}`
 		}
 	} satisfies Options;
 
@@ -109,70 +119,91 @@ ${input}
 	}
 </script>
 
-<main class="relative mx-auto max-w-5xl overflow-hidden px-4 pb-8">
+<svelte:head>
+	<title>Codeverter</title>
+	<meta name="description" content="Convert code to your programming language of choice" />
+</svelte:head>
+
+<main class="relative overflow-hidden flex min-h-screen flex-col justify-between gap-4 pb-8">
 	<div class="bg" />
-	<h1 class="mt-16 text-center text-5xl font-bold leading-tight ">
-		Convert <span class="gradient-text">code</span> to your programming
-		<span class="gradient-text">language</span> of choice
-	</h1>
+	<div class=" mx-auto max-w-5xl px-4 ">
+		<h1 class="mt-16 text-center text-5xl font-bold leading-tight ">
+			Convert <span class="gradient-text">code</span> to your programming
+			<span class="gradient-text">language</span> of choice
+		</h1>
 
-	<div class="mt-8 grid gap-4 lg:grid-cols-2">
-		<div>
-			<label for="input" class="font-semibold">Input</label>
-			<textarea
-				bind:value={input}
-				name="input"
-				class="input mt-2 w-full"
-				rows="20"
-				placeholder="Type here..."
-			/>
+		<div class="mt-8 grid gap-4 lg:grid-cols-2">
+			<div>
+				<label for="input" class="font-semibold">Input</label>
+				<textarea
+					bind:value={input}
+					name="input"
+					class="input mt-2 w-full"
+					rows="20"
+					placeholder="Type here..."
+				/>
+			</div>
+			<div>
+				<label for="output" class="font-semibold">Output</label>
+				<textarea
+					bind:value={output}
+					name="output"
+					readonly
+					class="input mt-2 w-full"
+					rows="20"
+					placeholder="Awaiting conversion..."
+				/>
+			</div>
 		</div>
-		<div>
-			<label for="output" class="font-semibold">Output</label>
-			<textarea
-				bind:value={output}
-				name="output"
-				readonly
-				class="input mt-2 w-full"
-				rows="20"
-				placeholder="Awaiting conversion..."
-			/>
+
+		<div class="mt-8 flex items-center justify-center gap-4">
+			<Button {loading} disabled={!input.trim()} on:click={search}>Convert</Button>
+			<span>to</span>
+			<Select bind:value={selected} icon={options[selected].icon}>
+				{#each objectKeys(options) as key}
+					<option value={key}>{options[key].label}</option>
+				{/each}
+			</Select>
 		</div>
-	</div>
 
-	<div class="mt-8 flex items-center justify-center gap-4">
-		<Button {loading} on:click={search}>Convert</Button>
-		<span>to</span>
-		<Select bind:value={selected} icon={options[selected].icon}>
-			{#each objectKeys(options) as key}
-				<option value={key}>{options[key].label}</option>
-			{/each}
-		</Select>
-	</div>
-
-	<!-- <button
+		<!-- <button
 		class="mx-auto mt-8 block text-gray-400 underline underline-offset-1 hover:text-gray-300"
 		on:click={() => (queryVisible = !queryVisible)}
 	>
 		{queryVisible ? 'Hide' : 'Modify'} search query
 	</button> -->
 
-	{#if queryVisible}
-		<div class="mt-4">
-			<label for="query" class="font-semibold">Query</label>
-			<textarea
-				bind:value={query}
-				name="query"
-				class="input mt-2 w-full"
-				rows="10"
-				placeholder="Awaiting conversion..."
-			/>
-		</div>
-	{/if}
+		{#if queryVisible}
+			<div class="mt-4">
+				<label for="query" class="font-semibold">Query</label>
+				<textarea
+					bind:value={query}
+					name="query"
+					class="input mt-2 w-full"
+					rows="10"
+					placeholder="Awaiting conversion..."
+				/>
+			</div>
+		{/if}
 
-	{#if error}
-		<p class="mt-4 text-center text-red-500">{error}</p>
-	{/if}
+		{#if error}
+			<p class="mt-4 text-center text-red-500">{error}</p>
+		{/if}
+	</div>
+
+	<footer class="text-center">
+		<p>
+			Made by <a
+				class="text-orange-300 underline hover:text-orange-200"
+				href="https://www.thomasglopes.com/"
+				target="_blank">Thomas G. Lopes</a
+			>
+		</p>
+		<p class="text-gray-500 text-sm mt-1">Warning: Code conversions may not be accurate.</p>
+		<p class="text-gray-500 text-sm">
+			Powered by OpenAI. <a href="" class="underline hover:text-gray-400">Source</a>
+		</p>
+	</footer>
 </main>
 
 <style lang="postcss">
