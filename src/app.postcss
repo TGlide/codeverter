@@ -2,10 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+	@apply bg-black text-white;
+}
+
 @layer components {
 	.btn {
-		--bg-color: theme('colors.emerald.200');
-		--fg-color: theme('colors.emerald.600');
+		--bg-color: theme('colors.orange.200');
+		--fg-color: theme('colors.orange.500');
 
 		display: inline-flex;
 		justify-content: center;
@@ -44,7 +48,7 @@
 			z-index: -1;
 		}
 
-		&:hover {
+		&:hover:not(:disabled) {
 			cursor: pointer;
 			translate: 0 -2px;
 
@@ -53,15 +57,17 @@
 			}
 		}
 
-		&:active {
+		&:active:not(:disabled) {
 			translate: 0 1px;
 
 			&::before {
 				translate: 0 1px;
 			}
 		}
-	}
 
-	.select {
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
 	}
 }

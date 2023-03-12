@@ -1,4 +1,4 @@
-import { createParser } from 'eventsource-parser';
+import { createParser, type ParseEvent } from 'eventsource-parser';
 import { OPENAI_API_KEY } from '$env/static/private';
 
 const key = OPENAI_API_KEY;
@@ -32,7 +32,8 @@ async function OpenAIStream(payload: OpenAIStreamPayload) {
 
 	const stream = new ReadableStream({
 		async start(controller) {
-			function onParse(event: any) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			function onParse(event: ParseEvent) {
 				if (event.type === 'event') {
 					const data = event.data;
 					// https://beta.openai.com/docs/api-reference/completions/create#completions/create-stream
@@ -61,6 +62,7 @@ async function OpenAIStream(payload: OpenAIStreamPayload) {
 			// this ensures we properly read chunks and invoke an event for each SSE event stream
 			const parser = createParser(onParse);
 			// https://web.dev/streams/#asynchronous-iteration
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			for await (const chunk of res.body as any) {
 				parser.feed(decoder.decode(chunk));
 			}
@@ -70,10 +72,10 @@ async function OpenAIStream(payload: OpenAIStreamPayload) {
 }
 
 export async function POST({ request }) {
-	const { searched } = await request.json();
+	const { search } = await request.json();
 	const payload = {
 		model: 'text-davinci-003',
-		prompt: searched,
+		prompt: search,
 		temperature: 0.7,
 		max_tokens: 2048,
 		top_p: 1.0,
