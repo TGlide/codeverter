@@ -201,7 +201,11 @@ ${input}
 		</p>
 		<p class="text-gray-500 text-sm mt-1">Warning: Code conversions may not be accurate.</p>
 		<p class="text-gray-500 text-sm">
-			Powered by OpenAI. <a href="" class="underline hover:text-gray-400">Source</a>
+			Powered by OpenAI. <a
+				href="https://github.com/TGlide/codeverter"
+				target="_blank"
+				class="underline hover:text-gray-400">Source</a
+			>
 		</p>
 	</footer>
 </main>
