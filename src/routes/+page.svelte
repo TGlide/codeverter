@@ -16,7 +16,9 @@
 		svelte: {
 			label: 'Svelte',
 			icon: 'svelte',
-			query: (input) => `Convert the following component to a Svelte component:\n${input}`
+			query: (input) => `Convert the following component to a Svelte component.
+			Don't import useState, as Svelte does not have it. Use Typescript.
+			Here's the component:\n${input}`
 		},
 		react: {
 			label: 'React',
