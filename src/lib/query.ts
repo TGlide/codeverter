@@ -86,7 +86,7 @@ export const queryOptions = {
 		query: createQueryFn(
 			(input) => `Convert the following CSS code to Tailwind CSS code. Use the @apply directive.
 	e.g. .input { border-radius: theme('borderRadius.md'); background-color: theme('colors.black/0.5');} should become
-	 <input class="rounded-md bg-black/50" />":\n${input})`
+	 <input class="rounded-md bg-black/50" />":\n${input}`
 		)
 	},
 	python: {

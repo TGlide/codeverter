@@ -107,7 +107,7 @@ async function OpenAIChatStream(search: string) {
 			}
 		],
 		temperature: 0,
-		max_tokens: 4097 - wordCount(search) * 2,
+		max_tokens: 3500 - wordCount(search) * 2,
 		frequency_penalty: 0.0,
 		stream: true,
 		presence_penalty: 0.0,
@@ -140,7 +140,10 @@ async function OpenAIChatStream(search: string) {
 		body: JSON.stringify(payload)
 	});
 
-	if (!res.ok) throw new Error("Couldn't fetch from OpenAI");
+	if (!res.ok) {
+		console.log(await res.json());
+		throw new Error("Couldn't fetch from OpenAI");
+	}
 
 	const stream = new ReadableStream({
 		async start(controller) {
