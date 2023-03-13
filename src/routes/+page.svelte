@@ -28,7 +28,7 @@
 		try {
 			const response = await fetch('/api/generate', {
 				method: 'POST',
-				body: JSON.stringify({ input, type: selected, key }),
+				body: JSON.stringify({ input, type: selected, key: $key }),
 				headers: {
 					'content-type': 'application/json'
 				}
