@@ -24,24 +24,22 @@
 		loading = true;
 		outputHtml = null;
 
-		const response = await fetch('/api/generate', {
-			method: 'POST',
-			body: JSON.stringify({ input, type: selected }),
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
+		try {
+			const response = await fetch('/api/generate', {
+				method: 'POST',
+				body: JSON.stringify({ input, type: selected }),
+				headers: {
+					'content-type': 'application/json'
+				}
+			});
 
-		if (response.ok) {
-			try {
-				await fetchStream(response, (chunk) => {
-					output += chunk;
-				});
-			} catch (err) {
-				error = 'Looks like OpenAI timed out :(';
-			}
-		} else {
-			error = await response.text();
+			if (!response.ok) throw new Error('Network response was not ok');
+
+			await fetchStream(response, (chunk) => {
+				output += chunk;
+			});
+		} catch (err) {
+			error = 'Looks like OpenAI timed out :(';
 		}
 
 		try {
@@ -49,7 +47,6 @@
 				outputHtml = highlighter.codeToHtml(output, { lang });
 			}
 		} catch (e) {
-			console.error(e);
 			outputHtml = null;
 		}
 

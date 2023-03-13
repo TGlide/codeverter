@@ -140,6 +140,8 @@ async function OpenAIChatStream(search: string) {
 		body: JSON.stringify(payload)
 	});
 
+	if (!res.ok) throw new Error("Couldn't fetch from OpenAI");
+
 	const stream = new ReadableStream({
 		async start(controller) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -151,6 +153,7 @@ async function OpenAIChatStream(search: string) {
 						controller.close();
 						return;
 					}
+
 					try {
 						const json = JSON.parse(data);
 						const text = json.choices[0].delta?.content;
@@ -174,7 +177,8 @@ async function OpenAIChatStream(search: string) {
 			// https://web.dev/streams/#asynchronous-iteration
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			for await (const chunk of res.body as any) {
-				parser.feed(decoder.decode(chunk));
+				const chunkString = decoder.decode(chunk);
+				parser.feed(chunkString);
 			}
 		}
 	});
@@ -186,5 +190,6 @@ export async function POST({ request }) {
 	const query = generateQuery(input, type);
 
 	const stream = await OpenAIChatStream(query);
+
 	return new Response(stream);
 }
