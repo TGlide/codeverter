@@ -82,7 +82,7 @@ export const queryOptions = {
 	tailwind: {
 		label: 'Tailwind',
 		icon: 'tailwind',
-		lang: 'css',
+		lang: 'html',
 		query: createQueryFn(
 			(input) => `Convert the following CSS code to Tailwind CSS code. Use the @apply directive.
 	e.g. .input { border-radius: theme('borderRadius.md'); background-color: theme('colors.black/0.5');} should become
