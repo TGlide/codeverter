@@ -8,7 +8,7 @@
 	import { onMount } from 'svelte';
 
 	let selected = objectKeys(queryOptions)[0];
-	$: lang = queryOptions[selected].lang;
+	$: lang = queryOptions[selected]?.lang;
 	let loading = false;
 	let error: string | null = null;
 
@@ -107,11 +107,14 @@
 		<div class="mt-8 flex items-center justify-center gap-4">
 			<Button {loading} disabled={!input.trim()} on:click={search}>Convert</Button>
 			<span>to</span>
-			<Select bind:value={selected} icon={queryOptions[selected].icon}>
-				{#each objectKeys(queryOptions) as key}
-					<option value={key}>{queryOptions[key].label}</option>
-				{/each}
-			</Select>
+			<Select
+				bind:value={selected}
+				options={Object.entries(queryOptions).map(([key, { label, icon }]) => ({
+					value: key,
+					label,
+					icon
+				}))}
+			/>
 		</div>
 
 		{#if error}
@@ -158,22 +161,6 @@
 		left: 50%;
 		translate: -50% -50px;
 		z-index: -1;
-	}
-
-	.input {
-		border: 1px solid theme('colors.gray.500');
-		border-radius: theme('borderRadius.md');
-		background-color: theme('colors.black/0.5');
-		padding: theme('padding.4');
-		font-family: theme('fontFamily.mono');
-		color: theme('colors.white');
-		resize: none;
-
-		&:focus {
-			border-color: theme('colors.orange.300');
-			outline: none;
-			@apply ring ring-orange-300;
-		}
 	}
 
 	:global(.shiki) {

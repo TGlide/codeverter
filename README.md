@@ -24,3 +24,4 @@ An OpenAI-powered code converter. It's a work in progress, but you can try it ou
 - [ ] Code highlighting
 - [ ] Code preview (?)
 - [ ] Better token handling
+- [ ] Progressive enhancement

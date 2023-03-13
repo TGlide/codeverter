@@ -71,4 +71,20 @@ body {
 			cursor: not-allowed;
 		}
 	}
+
+	.input {
+		border: 1px solid theme('colors.gray.500');
+		border-radius: theme('borderRadius.md');
+		background-color: theme('colors.black/0.5');
+		padding: theme('padding.4');
+		font-family: theme('fontFamily.mono');
+		color: theme('colors.white');
+		resize: none;
+
+		&:focus {
+			border-color: theme('colors.orange.300');
+			outline: none;
+			@apply ring ring-orange-300;
+		}
+	}
 }
