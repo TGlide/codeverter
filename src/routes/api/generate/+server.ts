@@ -1,6 +1,6 @@
 import { createParser, type ParseEvent } from 'eventsource-parser';
 import { OPENAI_API_KEY } from '$env/static/private';
-import { generateQuery } from '$helpers/query';
+import { generateQuery } from '$lib/query';
 import { wordCount } from '$helpers/string';
 
 const key = OPENAI_API_KEY;
@@ -153,7 +153,6 @@ async function OpenAIChatStream(search: string) {
 					}
 					try {
 						const json = JSON.parse(data);
-						console.log(json.choices[0]);
 						const text = json.choices[0].delta?.content;
 
 						if (!text || (counter < 2 && (text.match(/\n/) || []).length)) {

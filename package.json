@@ -40,6 +40,7 @@
 	"type": "module",
 	"dependencies": {
 		"@fontsource/inter": "^4.5.15",
-		"eventsource-parser": "^0.1.0"
+		"eventsource-parser": "^0.1.0",
+		"shiki": "^0.14.1"
 	}
 }

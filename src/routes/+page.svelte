@@ -1,74 +1,28 @@
 <script lang="ts">
 	import { objectKeys } from '$helpers/object';
 	import { fetchStream } from '$helpers/stream';
+	import { queryOptions } from '$lib/query';
 	import Button from '$UI/button.svelte';
-	import type { IconName } from '$UI/icon.svelte';
 	import Select from '$UI/select.svelte';
+	import { getHighlighter, setCDN, type Highlighter } from 'shiki';
+	import { onMount } from 'svelte';
 
-	type Options = {
-		[value: string]: {
-			label: string;
-			icon: IconName;
-		};
-	};
-	const options = {
-		svelte: {
-			label: 'Svelte',
-			icon: 'svelte'
-		},
-		react: {
-			label: 'React',
-			icon: 'react'
-		},
-		vue2: {
-			label: 'Vue 2',
-			icon: 'vue'
-		},
-		vue3: {
-			label: 'Vue 3',
-			icon: 'vue'
-		},
-		angular: {
-			label: 'Angular',
-			icon: 'angular'
-		},
-		css: {
-			label: 'CSS',
-			icon: 'css'
-		},
-		tailwind: {
-			label: 'Tailwind',
-			icon: 'tailwind'
-		},
-		python: {
-			label: 'Python',
-			icon: 'python'
-		},
-		javascript: {
-			label: 'JavaScript',
-			icon: 'javascript'
-		},
-		typescript: {
-			label: 'TypeScript',
-			icon: 'typescript'
-		},
-		rust: {
-			label: 'Rust',
-			icon: 'rust'
-		}
-	} satisfies Options;
-
+	let selected = objectKeys(queryOptions)[0];
+	$: lang = queryOptions[selected].lang;
 	let loading = false;
-	let output = '';
-	let input = '';
 	let error: string | null = null;
-	let selected = objectKeys(options)[0];
+
+	let input = '';
+	let output = '';
+	let outputHtml: string | null = null;
+	let highlighter: Highlighter;
 
 	async function search() {
 		if (loading || !input) return;
 		output = '';
 		error = null;
 		loading = true;
+		outputHtml = null;
 
 		const response = await fetch('/api/generate', {
 			method: 'POST',
@@ -89,8 +43,26 @@
 		} else {
 			error = await response.text();
 		}
+
+		try {
+			if (highlighter) {
+				outputHtml = highlighter.codeToHtml(output, { lang });
+			}
+		} catch (e) {
+			console.error(e);
+			outputHtml = null;
+		}
+
 		loading = false;
 	}
+
+	onMount(async () => {
+		setCDN('https://unpkg.com/shiki');
+		highlighter = await getHighlighter({
+			theme: 'github-dark',
+			langs: Object.values(queryOptions).map(({ lang }) => lang)
+		});
+	});
 </script>
 
 <svelte:head>
@@ -98,44 +70,49 @@
 	<meta name="description" content="Convert code to your programming language of choice" />
 </svelte:head>
 
-<main class="relative overflow-hidden flex min-h-screen flex-col justify-between gap-4 pb-8">
+<main class="relative flex min-h-screen flex-col justify-between gap-4 overflow-hidden pb-8">
 	<div class="bg" />
-	<div class=" mx-auto max-w-5xl px-4 ">
-		<h1 class="mt-16 text-center text-5xl font-bold leading-tight ">
+	<div class="mx-auto w-full max-w-7xl px-4 ">
+		<h1 class="mx-auto mt-16 max-w-5xl text-center text-5xl font-bold leading-tight ">
 			Convert <span class="gradient-text">code</span> to your programming
 			<span class="gradient-text">language</span> of choice
 		</h1>
 
-		<div class="mt-8 grid gap-4 lg:grid-cols-2">
-			<div>
+		<div class="mt-8 grid w-full gap-4 h-[50rem] lg:h-[36rem] lg:grid-cols-2">
+			<div class="flex flex-col">
 				<label for="input" class="font-semibold">Input</label>
 				<textarea
 					bind:value={input}
 					name="input"
-					class="input mt-2 w-full"
-					rows="20"
+					class="input mt-2 w-full grow"
 					placeholder="Type here..."
 				/>
 			</div>
-			<div>
+			<div class="flex flex-col">
 				<label for="output" class="font-semibold">Output</label>
-				<textarea
-					bind:value={output}
-					name="output"
-					readonly
-					class="input mt-2 w-full"
-					rows="20"
-					placeholder="Awaiting conversion..."
-				/>
+
+				{#if outputHtml}
+					<div class="input mt-2 w-full grow">
+						{@html outputHtml}
+					</div>
+				{:else}
+					<textarea
+						bind:value={output}
+						name="output"
+						readonly
+						class="input mt-2 w-full grow"
+						placeholder="Awaiting conversion..."
+					/>
+				{/if}
 			</div>
 		</div>
 
 		<div class="mt-8 flex items-center justify-center gap-4">
 			<Button {loading} disabled={!input.trim()} on:click={search}>Convert</Button>
 			<span>to</span>
-			<Select bind:value={selected} icon={options[selected].icon}>
-				{#each objectKeys(options) as key}
-					<option value={key}>{options[key].label}</option>
+			<Select bind:value={selected} icon={queryOptions[selected].icon}>
+				{#each objectKeys(queryOptions) as key}
+					<option value={key}>{queryOptions[key].label}</option>
 				{/each}
 			</Select>
 		</div>
@@ -153,8 +130,8 @@
 				target="_blank">Thomas G. Lopes</a
 			>
 		</p>
-		<p class="text-gray-500 text-sm mt-1">Warning: Code conversions may not be accurate.</p>
-		<p class="text-gray-500 text-sm">
+		<p class="mt-1 text-sm text-gray-500">Warning: Code conversions may not be accurate.</p>
+		<p class="text-sm text-gray-500">
 			Powered by OpenAI. <a
 				href="https://github.com/TGlide/codeverter"
 				target="_blank"
@@ -193,11 +170,17 @@
 		padding: theme('padding.4');
 		font-family: theme('fontFamily.mono');
 		color: theme('colors.white');
+		resize: none;
 
 		&:focus {
 			border-color: theme('colors.orange.300');
 			outline: none;
 			@apply ring ring-orange-300;
 		}
+	}
+
+	:global(.shiki) {
+		background-color: transparent !important;
+		white-space: pre-wrap;
 	}
 </style>
