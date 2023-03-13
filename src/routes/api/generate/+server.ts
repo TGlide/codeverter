@@ -1,6 +1,7 @@
 import { createParser, type ParseEvent } from 'eventsource-parser';
 import { OPENAI_API_KEY } from '$env/static/private';
 import { generateQuery } from '$helpers/query';
+import { wordCount } from '$helpers/string';
 
 const key = OPENAI_API_KEY;
 
@@ -106,7 +107,7 @@ async function OpenAIChatStream(search: string) {
 			}
 		],
 		temperature: 0,
-		max_tokens: 2048,
+		max_tokens: 4097 - wordCount(search) * 2,
 		frequency_penalty: 0.0,
 		stream: true,
 		presence_penalty: 0.0,
@@ -117,6 +118,18 @@ async function OpenAIChatStream(search: string) {
 	const decoder = new TextDecoder();
 
 	let counter = 0;
+
+	// const testRes = await fetch('https://api.openai.com/v1/chat/completions', {
+	// 	headers: {
+	// 		'Content-Type': 'application/json',
+	// 		Authorization: `Bearer ${key}`
+	// 	},
+	// 	method: 'POST',
+	// 	body: JSON.stringify({ ...payload, stream: false })
+	// });
+
+	// const testJson = await testRes.json();
+	// console.log(testJson);
 
 	const res = await fetch('https://api.openai.com/v1/chat/completions', {
 		headers: {

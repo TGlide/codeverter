@@ -23,3 +23,4 @@ An OpenAI-powered code converter. It's a work in progress, but you can try it ou
 - [ ] Add custom options for each language
 - [ ] Code highlighting
 - [ ] Code preview (?)
+- [ ] Better token handling
