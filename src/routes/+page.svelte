@@ -4,6 +4,7 @@
 	import { queryOptions } from '$lib/query';
 	import { key } from '$stores/key';
 	import Button from '$UI/button.svelte';
+	import Modal from '$UI/modal.svelte';
 	import Select from '$UI/select.svelte';
 	import { getHighlighter, setCDN, type Highlighter } from 'shiki';
 	import { onMount } from 'svelte';
@@ -17,6 +18,7 @@
 	let output = '';
 	let outputHtml: string | null = null;
 	let highlighter: Highlighter;
+	let settingsOpen = false;
 
 	async function search() {
 		if (loading || !input) return;
@@ -40,7 +42,7 @@
 				output += chunk;
 			});
 		} catch (err) {
-			error = 'Looks like OpenAI timed out :(';
+			error = 'Failed to contact OpenAI :(';
 		}
 
 		try {
@@ -53,6 +55,8 @@
 
 		loading = false;
 	}
+
+	$: if ($key) error = null;
 
 	onMount(async () => {
 		setCDN('https://unpkg.com/shiki');
@@ -106,7 +110,7 @@
 		</div>
 
 		<div class="mt-8 flex items-center justify-center gap-4">
-			<Button {loading} disabled={!input.trim() || !$key} on:click={search}>Convert</Button>
+			<Button {loading} disabled={!input.trim()} on:click={search}>Convert</Button>
 			<span>to</span>
 			<Select bind:value={selected} icon={queryOptions[selected].icon}>
 				{#each objectKeys(queryOptions) as key}
@@ -116,13 +120,19 @@
 		</div>
 
 		{#if error}
-			<p class="mt-4 text-center text-red-500">{error}</p>
+			<div class="mt-4 text-center text-red-500">
+				{#if !$key}
+					<button class="underline hover:text-red-400" on:click={() => (settingsOpen = true)}
+						>Set your API key</button
+					>
+				{:else}
+					<p>{error}</p>
+				{/if}
+			</div>
 		{/if}
 	</div>
 
 	<footer class="text-center">
-		<label for="api-key">API key: </label>
-		<input class="input px-2 py-2" type="password" id="api-key" bind:value={$key} />
 		<p class="mt-8">
 			Made by <a
 				class="text-orange-300 underline hover:text-orange-200"
@@ -132,19 +142,33 @@
 		</p>
 		<p class="mt-1 text-sm text-gray-500">Warning: Code conversions may not be accurate.</p>
 		<p class="text-sm text-gray-500">
-			Powered by OpenAI. <a
+			<button class=" underline hover:text-gray-400" on:click={() => (settingsOpen = true)}
+				>Manage API key</button
+			>
+			-
+			<a
 				href="https://github.com/TGlide/codeverter"
 				target="_blank"
 				class="underline hover:text-gray-400">Source</a
 			>
 		</p>
-		<a
-			class="text-sm text-gray-500 underline hover:text-gray-400"
-			href="https://platform.openai.com/account/api-keys"
-			target="_blank">Generate API keys</a
-		>
 	</footer>
 </main>
+
+<Modal bind:open={settingsOpen} title="Settings">
+	<div class="flex flex-col gap-2">
+		<label class="font-semibold" for="api-key">API key: </label>
+		<input class="input px-2 py-2" type="password" id="api-key" bind:value={$key} />
+	</div>
+
+	<p class="text-sm text-gray-300 mt-4">
+		Get your free API key <a
+			class="underline hover:opacity-75"
+			href="https://platform.openai.com/account/api-keys"
+			target="_blank">here</a
+		>
+	</p>
+</Modal>
 
 <style lang="postcss">
 	.gradient-text {
