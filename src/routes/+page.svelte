@@ -2,6 +2,7 @@
 	import { objectKeys } from '$helpers/object';
 	import { fetchStream } from '$helpers/stream';
 	import { queryOptions } from '$lib/query';
+	import { key } from '$stores/key';
 	import Button from '$UI/button.svelte';
 	import Select from '$UI/select.svelte';
 	import { getHighlighter, setCDN, type Highlighter } from 'shiki';
@@ -27,7 +28,7 @@
 		try {
 			const response = await fetch('/api/generate', {
 				method: 'POST',
-				body: JSON.stringify({ input, type: selected }),
+				body: JSON.stringify({ input, type: selected, key }),
 				headers: {
 					'content-type': 'application/json'
 				}
@@ -81,7 +82,7 @@
 				<textarea
 					bind:value={input}
 					name="input"
-					class="input mt-2 w-full grow"
+					class="textarea mt-2 w-full grow"
 					placeholder="Type here..."
 				/>
 			</div>
@@ -89,7 +90,7 @@
 				<label for="output" class="font-semibold">Output</label>
 
 				{#if outputHtml}
-					<div class="input mt-2 w-full grow">
+					<div class="textarea mt-2 w-full grow">
 						{@html outputHtml}
 					</div>
 				{:else}
@@ -97,7 +98,7 @@
 						bind:value={output}
 						name="output"
 						readonly
-						class="input mt-2 w-full grow"
+						class="textarea mt-2 w-full grow"
 						placeholder="Awaiting conversion..."
 					/>
 				{/if}
@@ -105,7 +106,7 @@
 		</div>
 
 		<div class="mt-8 flex items-center justify-center gap-4">
-			<Button {loading} disabled={!input.trim()} on:click={search}>Convert</Button>
+			<Button {loading} disabled={!input.trim() || !$key} on:click={search}>Convert</Button>
 			<span>to</span>
 			<Select bind:value={selected} icon={queryOptions[selected].icon}>
 				{#each objectKeys(queryOptions) as key}
@@ -120,7 +121,9 @@
 	</div>
 
 	<footer class="text-center">
-		<p>
+		<label for="api-key">API key: </label>
+		<input class="input px-2 py-2" type="password" id="api-key" bind:value={$key} />
+		<p class="mt-8">
 			Made by <a
 				class="text-orange-300 underline hover:text-orange-200"
 				href="https://www.thomasglopes.com/"
@@ -135,6 +138,11 @@
 				class="underline hover:text-gray-400">Source</a
 			>
 		</p>
+		<a
+			class="text-sm text-gray-500 underline hover:text-gray-400"
+			href="https://platform.openai.com/account/api-keys"
+			target="_blank">Generate API keys</a
+		>
 	</footer>
 </main>
 
@@ -158,22 +166,6 @@
 		left: 50%;
 		translate: -50% -50px;
 		z-index: -1;
-	}
-
-	.input {
-		border: 1px solid theme('colors.gray.500');
-		border-radius: theme('borderRadius.md');
-		background-color: theme('colors.black/0.5');
-		padding: theme('padding.4');
-		font-family: theme('fontFamily.mono');
-		color: theme('colors.white');
-		resize: none;
-
-		&:focus {
-			border-color: theme('colors.orange.300');
-			outline: none;
-			@apply ring ring-orange-300;
-		}
 	}
 
 	:global(.shiki) {

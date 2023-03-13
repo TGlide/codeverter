@@ -97,7 +97,7 @@ interface OpenAIChatPayload {
 	n: number;
 }
 
-async function OpenAIChatStream(search: string) {
+async function OpenAIChatStream(search: string, key: string) {
 	const payload: OpenAIChatPayload = {
 		model: 'gpt-3.5-turbo',
 		messages: [
@@ -189,10 +189,10 @@ async function OpenAIChatStream(search: string) {
 }
 
 export async function POST({ request }) {
-	const { input, type } = await request.json();
+	const { input, type, key } = await request.json();
 	const query = generateQuery(input, type);
 
-	const stream = await OpenAIChatStream(query);
+	const stream = await OpenAIChatStream(query, key);
 
 	return new Response(stream);
 }
