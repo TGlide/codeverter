@@ -20,7 +20,12 @@ An OpenAI-powered code converter. It's a work in progress, but you can try it ou
 
 - [ ] Add more languages
 - [ ] Swap select for autocomplete
-- [ ] Add custom options for each language
 - [ ] Better token handling
 - [ ] Progressive enhancement
 - [x] Code highlighting
+
+## Ideas
+
+- [ ] OAuth/Email auth to allow free users to save their code
+- [ ] Code preview
+- [ ] Add custom options for each language
