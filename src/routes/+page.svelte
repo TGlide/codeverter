@@ -9,77 +9,52 @@
 		[value: string]: {
 			label: string;
 			icon: IconName;
-			query: (input: string) => string;
 		};
 	};
 	const options = {
 		svelte: {
 			label: 'Svelte',
-			icon: 'svelte',
-			query: (input) => `Convert the following component to a Svelte component.
-			Don't import useState, as Svelte does not have it. Use Typescript.
-			Here's the component:\n${input}`
+			icon: 'svelte'
 		},
 		react: {
 			label: 'React',
-			icon: 'react',
-			query: (input) => `Convert the following component to a React component:\n${input}`
+			icon: 'react'
 		},
 		vue2: {
 			label: 'Vue 2',
-			icon: 'vue',
-			query: (input) => `Convert the following component to a Vue 2 component:\n${input}`
+			icon: 'vue'
 		},
 		vue3: {
 			label: 'Vue 3',
-			icon: 'vue',
-			query: (input) =>
-				`Convert the following component to a Vue 3 component, using SFCs, template tags, and <script setup>:\n${input}`
+			icon: 'vue'
 		},
 		angular: {
 			label: 'Angular',
-			icon: 'angular',
-			query: (input) => `Convert the following component to an Angular component:\n${input}`
+			icon: 'angular'
 		},
 		css: {
 			label: 'CSS',
-			icon: 'css',
-			query: (input) => `Convert the following tailwind-css code to normal CSS.
-Use the theme function when possible, e.g. '@apply text-white' should become 'color: theme("colors.white")''. 
-Also, be smart with opacity colors. e.g. '@apply bg-black-50' should become 'background-color: theme("colors.black/0.5")'.
-Do not use CSS vars. Do not use hex color values.
-For hover states, use SCSS-like nesting. e.g. '@apply hover:bg-black-50' should become '&:hover { background-color: theme("colors.black/0.5") }'.
-This is the code:\n${input}`
+			icon: 'css'
 		},
 		tailwind: {
 			label: 'Tailwind',
-			icon: 'tailwind',
-			query: (
-				input
-			) => `Convert the following CSS code to Tailwind CSS code. Use the @apply directive.
-e.g. .input { border-radius: theme('borderRadius.md'); background-color: theme('colors.black/0.5');} should become <input class="rounded-md bg-black/50" />":
-${input}		
-			`
+			icon: 'tailwind'
 		},
 		python: {
 			label: 'Python',
-			icon: 'python',
-			query: (input) => `Convert the following code to Python 3:\n${input}`
+			icon: 'python'
 		},
 		javascript: {
 			label: 'JavaScript',
-			icon: 'javascript',
-			query: (input) => `Convert the following code to JavaScript:\n${input}`
+			icon: 'javascript'
 		},
 		typescript: {
 			label: 'TypeScript',
-			icon: 'typescript',
-			query: (input) => `Convert the following code to TypeScript:\n${input}`
+			icon: 'typescript'
 		},
 		rust: {
 			label: 'Rust',
-			icon: 'rust',
-			query: (input) => `Convert the following code to Rust:\n${input}`
+			icon: 'rust'
 		}
 	} satisfies Options;
 
@@ -88,9 +63,6 @@ ${input}
 	let input = '';
 	let error: string | null = null;
 	let selected = objectKeys(options)[0];
-	let queryVisible = false;
-	let query = options[selected].query(input);
-	$: query = options[selected].query(input);
 
 	async function search() {
 		if (loading || !input) return;
@@ -100,7 +72,7 @@ ${input}
 
 		const response = await fetch('/api/generate', {
 			method: 'POST',
-			body: JSON.stringify({ search: query }),
+			body: JSON.stringify({ input, type: selected }),
 			headers: {
 				'content-type': 'application/json'
 			}
@@ -167,26 +139,6 @@ ${input}
 				{/each}
 			</Select>
 		</div>
-
-		<!-- <button
-		class="mx-auto mt-8 block text-gray-400 underline underline-offset-1 hover:text-gray-300"
-		on:click={() => (queryVisible = !queryVisible)}
-	>
-		{queryVisible ? 'Hide' : 'Modify'} search query
-	</button> -->
-
-		{#if queryVisible}
-			<div class="mt-4">
-				<label for="query" class="font-semibold">Query</label>
-				<textarea
-					bind:value={query}
-					name="query"
-					class="input mt-2 w-full"
-					rows="10"
-					placeholder="Awaiting conversion..."
-				/>
-			</div>
-		{/if}
 
 		{#if error}
 			<p class="mt-4 text-center text-red-500">{error}</p>
