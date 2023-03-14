@@ -19,6 +19,7 @@
 	let outputHtml: string | null = null;
 	let highlighter: Highlighter;
 	let settingsOpen = false;
+	let copied = false;
 
 	async function search() {
 		if (loading || !input) return;
@@ -58,6 +59,13 @@
 
 	$: if ($key) error = null;
 
+	const handleCopy = () => {
+		if (copied) return;
+		navigator.clipboard.writeText(output)
+		copied = true;
+		setTimeout(() => copied = false, 1000);
+	};
+
 	onMount(async () => {
 		setCDN('https://unpkg.com/shiki');
 		highlighter = await getHighlighter({
@@ -90,7 +98,16 @@
 					placeholder="Type here..."
 				/>
 			</div>
-			<div class="flex flex-col">
+			<div class="flex flex-col relative">
+				<button class={`btn btn-primary absolute right-0 -top-4`}
+				disabled={!outputHtml}
+				 on:click={handleCopy}>
+					{#if copied}
+						Copied!
+					{:else}
+						Copy Code
+					{/if}
+				</button>
 				<label for="output" class="font-semibold">Output</label>
 
 				{#if outputHtml}
