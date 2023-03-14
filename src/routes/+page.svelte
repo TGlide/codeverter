@@ -80,7 +80,7 @@
 			<span class="gradient-text">language</span> of choice
 		</h1>
 
-		<div class="mt-8 grid w-full gap-4 h-[50rem] lg:h-[36rem] lg:grid-cols-2">
+		<div class="mt-8 grid w-full gap-4 min-h-[50rem] lg:min-h-[36rem] lg:grid-cols-2">
 			<div class="flex flex-col">
 				<label for="input" class="font-semibold">Input</label>
 				<textarea
@@ -94,7 +94,7 @@
 				<label for="output" class="font-semibold">Output</label>
 
 				{#if outputHtml}
-					<div class="textarea mt-2 w-full grow">
+					<div class="textarea mt-2 w-full grow max-h-[50rem] lg:max-h-[36rem] overflow-y-auto">
 						{@html outputHtml}
 					</div>
 				{:else}
