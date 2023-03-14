@@ -19,6 +19,7 @@
 	let outputHtml: string | null = null;
 	let highlighter: Highlighter;
 	let settingsOpen = false;
+	let copied = false;
 
 	async function search() {
 		if (loading || !input) return;
@@ -58,6 +59,13 @@
 
 	$: if ($key) error = null;
 
+	const handleCopy = () => {
+		if (copied) return;
+		navigator.clipboard.writeText(output)
+		copied = true;
+		setTimeout(() => copied = false, 1000);
+	};
+
 	onMount(async () => {
 		setCDN('https://unpkg.com/shiki');
 		highlighter = await getHighlighter({
@@ -80,7 +88,7 @@
 			<span class="gradient-text">language</span> of choice
 		</h1>
 
-		<div class="mt-8 grid w-full gap-4 h-[50rem] lg:h-[36rem] lg:grid-cols-2">
+		<div class="mt-8 grid w-full gap-4 min-h-[50rem] lg:min-h-[36rem] lg:grid-cols-2">
 			<div class="flex flex-col">
 				<label for="input" class="font-semibold">Input</label>
 				<textarea
@@ -90,11 +98,20 @@
 					placeholder="Type here..."
 				/>
 			</div>
-			<div class="flex flex-col">
+			<div class="flex flex-col relative">
+				<button class={`btn btn-primary absolute right-0 -top-4`}
+				disabled={!outputHtml}
+				 on:click={handleCopy}>
+					{#if copied}
+						Copied!
+					{:else}
+						Copy Code
+					{/if}
+				</button>
 				<label for="output" class="font-semibold">Output</label>
 
 				{#if outputHtml}
-					<div class="textarea mt-2 w-full grow">
+					<div class="textarea mt-2 w-full grow max-h-[50rem] lg:max-h-[36rem] overflow-y-auto">
 						{@html outputHtml}
 					</div>
 				{:else}
