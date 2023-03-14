@@ -4,7 +4,7 @@
 	import { queryOptions } from '$lib/query';
 	import { key } from '$stores/key';
 	import Button from '$UI/button.svelte';
-	import Modal from '$UI/modal.svelte';
+	import Modal from '$components/modal.svelte';
 	import Select from '$UI/select.svelte';
 	import { getHighlighter, setCDN, type Highlighter } from 'shiki';
 	import { onMount } from 'svelte';
