@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fade, scale, type TransitionConfig } from 'svelte/transition';
+	import { scale, type TransitionConfig } from 'svelte/transition';
 	import Icon from '../UI/icon.svelte';
 
 	export let open = false;

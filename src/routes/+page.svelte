@@ -1,23 +1,25 @@
 <script lang="ts">
+	import Modal from '$components/modal.svelte';
+	import Output from '$components/output.svelte';
 	import { objectKeys } from '$helpers/object';
 	import { fetchStream } from '$helpers/stream';
 	import { queryOptions } from '$lib/query';
 	import { key } from '$stores/key';
 	import Button from '$UI/button.svelte';
-	import Modal from '$components/modal.svelte';
 	import Select from '$UI/select.svelte';
-	import { getHighlighter, setCDN, type Highlighter } from 'shiki';
-	import { onMount } from 'svelte';
 
 	let selected = objectKeys(queryOptions)[0];
 	$: lang = queryOptions[selected].lang;
+
+	enum ErrorCode {
+		NoKey = 'Set your API key',
+		Generic = 'Failed to contact OpenAI :('
+	}
+	let error: ErrorCode | null = null;
 	let loading = false;
-	let error: string | null = null;
 
 	let input = '';
 	let output = '';
-	let outputHtml: string | null = null;
-	let highlighter: Highlighter;
 	let settingsOpen = false;
 
 	async function search() {
@@ -25,7 +27,6 @@
 		output = '';
 		error = null;
 		loading = true;
-		outputHtml = null;
 
 		try {
 			const response = await fetch('/api/generate', {
@@ -42,29 +43,13 @@
 				output += chunk;
 			});
 		} catch (err) {
-			error = 'Failed to contact OpenAI :(';
-		}
-
-		try {
-			if (highlighter) {
-				outputHtml = highlighter.codeToHtml(output, { lang });
-			}
-		} catch (e) {
-			outputHtml = null;
+			error = $key ? ErrorCode.Generic : ErrorCode.NoKey;
 		}
 
 		loading = false;
 	}
 
 	$: if ($key) error = null;
-
-	onMount(async () => {
-		setCDN('https://unpkg.com/shiki');
-		highlighter = await getHighlighter({
-			theme: 'github-dark',
-			langs: Object.values(queryOptions).map(({ lang }) => lang)
-		});
-	});
 </script>
 
 <svelte:head>
@@ -75,13 +60,13 @@
 <main class="relative flex min-h-screen flex-col justify-between gap-4 overflow-hidden pb-8">
 	<div class="bg" />
 	<div class="mx-auto w-full max-w-7xl px-2 lg:px-4">
-		<h1 class="mx-auto mt-16 max-w-5xl text-center text-3xl lg:text-5xl font-bold lg:leading-tight">
+		<h1 class="mx-auto mt-16 max-w-5xl text-center text-3xl font-bold lg:text-5xl lg:leading-tight">
 			Convert <span class="gradient-text">code</span> to your programming
 			<span class="gradient-text">language</span> of choice
 		</h1>
 
 		<div class="mt-8 grid w-full gap-4 lg:grid-cols-2">
-			<div class="flex flex-col h-[20rem] lg:h-[30rem]">
+			<div class="flex h-[20rem] flex-col lg:h-[30rem]">
 				<label for="input" class="font-semibold">Input</label>
 				<textarea
 					bind:value={input}
@@ -90,22 +75,10 @@
 					placeholder="Type here..."
 				/>
 			</div>
-			<div class="flex flex-col h-[20rem] lg:h-[30rem]">
+			<div class="flex h-[20rem] flex-col lg:h-[30rem]">
 				<label for="output" class="font-semibold">Output</label>
 
-				{#if outputHtml}
-					<div class="textarea mt-2 w-full grow overflow-auto">
-						{@html outputHtml}
-					</div>
-				{:else}
-					<textarea
-						bind:value={output}
-						name="output"
-						readonly
-						class="textarea mt-2 w-full grow overflow-auto"
-						placeholder="Awaiting conversion..."
-					/>
-				{/if}
+				<Output value={output} {lang} />
 			</div>
 		</div>
 
@@ -119,16 +92,16 @@
 			</Select>
 		</div>
 
-		{#if error}
-			<div class="mt-4 text-center text-red-500">
-				{#if !$key}
-					<button class="underline hover:text-red-400" on:click={() => (settingsOpen = true)}
-						>Set your API key</button
-					>
-				{:else}
-					<p>{error}</p>
-				{/if}
-			</div>
+		{#if error === ErrorCode.Generic}
+			<p class="mt-4 text-center text-red-500">{error}</p>
+		{/if}
+		{#if error === ErrorCode.NoKey}
+			<button
+				class="mt-4 mx-auto block text-red-500 underline hover:text-red-400"
+				on:click={() => (settingsOpen = true)}
+			>
+				Set your API key
+			</button>
 		{/if}
 	</div>
 
@@ -137,20 +110,24 @@
 			Made by <a
 				class="text-orange-300 underline hover:text-orange-200"
 				href="https://www.thomasglopes.com/"
-				target="_blank">Thomas G. Lopes</a
+				target="_blank"
 			>
+				Thomas G. Lopes
+			</a>
 		</p>
 		<p class="mt-1 text-sm text-gray-500">Warning: Code conversions may not be accurate.</p>
 		<p class="text-sm text-gray-500">
-			<button class=" underline hover:text-gray-400" on:click={() => (settingsOpen = true)}
-				>Manage API key</button
-			>
+			<button class="underline hover:text-gray-400" on:click={() => (settingsOpen = true)}>
+				Manage API key
+			</button>
 			-
 			<a
 				href="https://github.com/TGlide/codeverter"
 				target="_blank"
-				class="underline hover:text-gray-400">Source</a
+				class="underline hover:text-gray-400"
 			>
+				Source
+			</a>
 		</p>
 	</footer>
 </main>
@@ -161,7 +138,7 @@
 		<input class="input px-2 py-2" type="password" id="api-key" bind:value={$key} />
 	</div>
 
-	<p class="text-sm text-gray-300 mt-4">
+	<p class="mt-4 text-sm text-gray-300">
 		Get your free API key <a
 			class="underline hover:opacity-75"
 			href="https://platform.openai.com/account/api-keys"
