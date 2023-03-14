@@ -81,27 +81,26 @@
 		type="text"
 		class="input font-sans py-2 pr-2 pl-9 w-48"
 		on:focus={() => (hasFocus = true)}
-		on:blur={() => {
-			hasFocus = false;
-			input = getSelectedOption(value)?.label || '';
-		}}
 		on:keydown={onKeydown}
 		bind:value={input}
 	/>
 	<div class="suggestions" class:hidden={!hasFocus || !filteredOptions.length}>
-		<ul>
-			{#each filteredOptions as option, i}
-				<li class="flex items-center py-2" data-selected={i === selectedIndex}>
-					<span>
-						{#if option.icon}
-							<Icon name={option.icon} />
-						{/if}
-					</span>
-
-					{option.label}
-				</li>
-			{/each}
-		</ul>
+		{#each filteredOptions as option, i}
+			<button
+				data-selected={i === selectedIndex}
+				on:click={() => {
+					input = option.label;
+					hasFocus = false;
+				}}
+			>
+				<span>
+					{#if option.icon}
+						<Icon name={option.icon} />
+					{/if}
+				</span>
+				{option.label}
+			</button>
+		{/each}
 	</div>
 	<!-- <select class="input py-2 pr-2 pl-9 font-sans bg-black" bind:value>
 		{#each options as option}
@@ -125,23 +124,23 @@
 		padding: theme('spacing.2');
 	}
 
-	ul {
+	.suggestions {
 		display: flex;
 		flex-direction: column;
 		gap: theme('spacing.1');
-	}
 
-	li {
-		display: flex;
-		align-items: center;
-		gap: theme('spacing.2');
-		padding: theme('spacing.2');
-		border-radius: theme('borderRadius.md');
+		button {
+			display: flex;
+			align-items: center;
+			gap: theme('spacing.2');
+			padding: theme('spacing.2');
+			border-radius: theme('borderRadius.md');
 
-		&:hover,
-		&[data-selected='true'] {
-			background-color: theme('colors.zinc.800');
-			cursor: pointer;
+			&:hover,
+			&[data-selected='true'] {
+				background-color: theme('colors.zinc.800');
+				cursor: pointer;
+			}
 		}
 	}
 </style>
