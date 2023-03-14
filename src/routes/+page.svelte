@@ -19,7 +19,6 @@
 	let outputHtml: string | null = null;
 	let highlighter: Highlighter;
 	let settingsOpen = false;
-	let copied = false;
 
 	async function search() {
 		if (loading || !input) return;
@@ -59,13 +58,6 @@
 
 	$: if ($key) error = null;
 
-	const handleCopy = () => {
-		if (copied) return;
-		navigator.clipboard.writeText(output)
-		copied = true;
-		setTimeout(() => copied = false, 1000);
-	};
-
 	onMount(async () => {
 		setCDN('https://unpkg.com/shiki');
 		highlighter = await getHighlighter({
@@ -82,36 +74,27 @@
 
 <main class="relative flex min-h-screen flex-col justify-between gap-4 overflow-hidden pb-8">
 	<div class="bg" />
-	<div class="mx-auto w-full max-w-7xl px-4 ">
-		<h1 class="mx-auto mt-16 max-w-5xl text-center text-5xl font-bold leading-tight ">
+	<div class="mx-auto w-full max-w-7xl px-2 lg:px-4">
+		<h1 class="mx-auto mt-16 max-w-5xl text-center text-3xl lg:text-5xl font-bold lg:leading-tight">
 			Convert <span class="gradient-text">code</span> to your programming
 			<span class="gradient-text">language</span> of choice
 		</h1>
 
-		<div class="mt-8 grid w-full gap-4 min-h-[50rem] lg:min-h-[36rem] lg:grid-cols-2">
-			<div class="flex flex-col">
+		<div class="mt-8 grid w-full gap-4 lg:grid-cols-2">
+			<div class="flex flex-col h-[20rem] lg:h-[30rem]">
 				<label for="input" class="font-semibold">Input</label>
 				<textarea
 					bind:value={input}
 					name="input"
-					class="textarea mt-2 w-full grow"
+					class="textarea mt-2 w-full grow overflow-auto"
 					placeholder="Type here..."
 				/>
 			</div>
-			<div class="flex flex-col relative">
-				<button class={`btn btn-primary absolute right-0 -top-4`}
-				disabled={!outputHtml}
-				 on:click={handleCopy}>
-					{#if copied}
-						Copied!
-					{:else}
-						Copy Code
-					{/if}
-				</button>
+			<div class="flex flex-col h-[20rem] lg:h-[30rem]">
 				<label for="output" class="font-semibold">Output</label>
 
 				{#if outputHtml}
-					<div class="textarea mt-2 w-full grow max-h-[50rem] lg:max-h-[36rem] overflow-y-auto">
+					<div class="textarea mt-2 w-full grow overflow-auto">
 						{@html outputHtml}
 					</div>
 				{:else}
@@ -119,7 +102,7 @@
 						bind:value={output}
 						name="output"
 						readonly
-						class="textarea mt-2 w-full grow"
+						class="textarea mt-2 w-full grow overflow-auto"
 						placeholder="Awaiting conversion..."
 					/>
 				{/if}
