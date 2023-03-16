@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Copy from '$components/copy.svelte';
 	import Modal from '$components/modal.svelte';
 	import Output from '$components/output.svelte';
 	import { objectKeys } from '$helpers/object';
@@ -66,7 +67,7 @@
 		</h1>
 
 		<div class="mt-8 grid w-full gap-4 lg:grid-cols-2">
-			<div class="flex h-[20rem] flex-col lg:h-[30rem]">
+			<div class="flex h-[20rem] flex-col lg:h-[40rem]">
 				<label for="input" class="font-semibold">Input</label>
 				<textarea
 					bind:value={input}
@@ -75,8 +76,13 @@
 					placeholder="Type here..."
 				/>
 			</div>
-			<div class="flex h-[20rem] flex-col lg:h-[30rem]">
-				<label for="output" class="font-semibold">Output</label>
+			<div class="flex h-[20rem] flex-col lg:h-[40rem]">
+				<div class="flex justify-between items-center">
+					<label for="output" class="font-semibold">Output</label>
+					{#if output}
+						<Copy value={output} />
+					{/if}
+				</div>
 
 				<Output value={output} {lang} />
 			</div>

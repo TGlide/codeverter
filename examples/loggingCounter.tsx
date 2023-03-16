@@ -1,3 +1,5 @@
+import { useState, useRef, useEffect } from 'react';
+
 const Counter = () => {
 	const [count, setCount] = useState(0);
 	const countRef = useRef(count);

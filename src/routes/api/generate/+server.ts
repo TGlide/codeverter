@@ -1,11 +1,11 @@
 import { wordCount } from '$helpers/string';
-import { generateQuery } from '$lib/query';
+import { generateQuery, systemQuery } from '$lib/query';
 import { createParser, type ParseEvent } from 'eventsource-parser';
 
 interface OpenAIChatPayload {
 	model: string;
 	messages: Array<{
-		role: 'user';
+		role: 'user' | 'system' | 'agent';
 		content: string;
 	}>;
 	temperature: number;
@@ -20,6 +20,7 @@ async function OpenAIChatStream(search: string, key: string) {
 	const payload: OpenAIChatPayload = {
 		model: 'gpt-3.5-turbo',
 		messages: [
+			{ role: 'system', content: systemQuery },
 			{
 				role: 'user',
 				content: search
@@ -84,6 +85,7 @@ async function OpenAIChatStream(search: string, key: string) {
 							// this is a prefix character (i.e., "\n\n"), do nothing
 							return;
 						}
+
 						const queue = encoder.encode(text);
 						controller.enqueue(queue);
 						counter++;
