@@ -26,7 +26,7 @@ async function OpenAIChatStream(search: string, key: string) {
 				content: search
 			}
 		],
-
+		temperature: 0.5,
 		max_tokens: 3500 - wordCount(search) * 2,
 		frequency_penalty: 0.0,
 		stream: true,
