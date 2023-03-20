@@ -33,8 +33,8 @@
 
 		const createNewOption: (typeof options)[number] = {
 			value: input,
-			label: `Create "${input}"`,
-			icon: 'copy'
+			label: input,
+			icon: 'code'
 		};
 
 		return [createNewOption, ...filtered];
@@ -119,7 +119,7 @@
 
 	<input
 		type="text"
-		class="input font-sans py-2 pr-2 pl-9 w-48"
+		class="input font-sans py-2 pr-2 pl-10 w-48"
 		on:focus={() => (hasFocus = true)}
 		on:click={() => (hasFocus = true)}
 		on:input={() => (dirty = true)}
