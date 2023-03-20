@@ -39,6 +39,10 @@
 		selectedIndex = filteredOptions.findIndex((option) => option.label === input);
 	}
 
+	$: if (hasFocus === false) {
+		input = getSelectedOption(value)?.label || '';
+	}
+
 	// Helpers
 	const tooltip: Action<HTMLDivElement> = (wrapperEl) => {
 		const suggestionsEl = wrapperEl.querySelector('.suggestions') as HTMLDivElement;
