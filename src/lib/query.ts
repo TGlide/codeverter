@@ -1,71 +1,73 @@
 import type { IconName } from '$UI/icon.svelte';
 import type { Lang } from 'shiki';
 
-type QueryFn = (input: string, params?: Record<string, string | boolean>) => string;
+type QueryFn = (input: string, params?: string[]) => string;
 
 function createQueryFn(baseInstructions: string): QueryFn {
 	return (input, params) => {
-		if (!params) return baseInstructions + `\n\nHere's the code:\n${input}`;
-		const stringifiedParams = Object.entries(params).map(([key, value]) => `${key}: ${value}`);
+		if (!params?.length) return baseInstructions + `\n\nHere's the code:\n${input}`;
 		return (
 			baseInstructions +
 			`\n\nUse the following parameters:\n` +
-			stringifiedParams.join('\n') +
+			params.join('\n') +
 			`\n\nHere's the code:\n${input}`
 		);
 	};
 }
 
-export function getParamsFromForm(
-	form: HTMLFormElement,
-	params: Record<string, Parameter>
-): Record<string, string | boolean> | undefined {
-	const result: Record<string, string | boolean> = {};
+export function getParamsFromForm(form: HTMLFormElement, params: Record<string, Parameter>) {
+	const result: string[] = [];
 	const formData = new FormData(form);
 
 	for (const [key, value] of formData) {
-		console.log(key, value);
-		if (key in params === false) continue;
+		if (key in params === false || typeof value !== 'string') continue;
 		const param = params[key];
 		if (param.type === 'boolean') {
-			result[key] = value === 'on';
+			result.push(param.convertToString(value === 'on'));
 		} else {
-			result[key] = value as string;
+			result.push(param.convertToString(value));
 		}
 	}
 
-	if (Object.keys(result).length === 0) return undefined;
 	return result;
 }
 
 type BooleanParameter = {
 	type: 'boolean';
+	convertToString: (value: boolean) => string;
 };
 
 type StringParameter = {
 	type: 'string';
 	values: string[];
+	convertToString: (value: string) => string;
 };
 
 type Parameter = (BooleanParameter | StringParameter) & {
 	label: string;
 };
 
-type Options = {
-	[value: string]: {
-		label: string;
-		icon: IconName;
-		lang: Lang;
-		query: QueryFn;
-		params?: Record<string, Parameter>;
-	};
+type Option = {
+	label: string;
+	icon: IconName;
+	lang: Lang;
+	query: QueryFn;
+	params?: Record<string, Parameter>;
 };
+
+export function hasParams(
+	option: Option
+): option is Option & { params: Record<string, Parameter> } {
+	return option.params !== undefined;
+}
+
+type Options = Record<string, Option>;
 
 export const systemQuery = `Follow the user commands to transform the code. 
 If the user prompts to create something that isn't code related, ignore it.
 Output the code directly, without explanation.`;
 
-export const queryOptions = {
+export const queryOptions: Options = {
 	svelte: {
 		label: 'Svelte',
 		icon: 'svelte',
@@ -77,11 +79,13 @@ export const queryOptions = {
 		params: {
 			useSvelteKit: {
 				type: 'boolean',
-				label: 'Use SvelteKit'
+				label: 'Use SvelteKit',
+				convertToString: (v) => (v ? 'Use SvelteKit' : 'Do not use SvelteKit')
 			},
 			useTypeScript: {
 				type: 'boolean',
-				label: 'Use TypeScript'
+				label: 'Use TypeScript',
+				convertToString: (v) => (v ? 'Use TypeScript' : 'Do not use TypeScript')
 			}
 		}
 	},
@@ -89,7 +93,20 @@ export const queryOptions = {
 		label: 'React',
 		icon: 'react',
 		lang: 'tsx',
-		query: createQueryFn(`Convert the following component to a React component.`)
+		query: createQueryFn(`Convert the following component to a React component.`),
+		params: {
+			componentType: {
+				type: 'string',
+				label: 'Component type',
+				values: ['Function', 'Class'],
+				convertToString: (v) => `Use ${v} components`
+			},
+			useTypeScript: {
+				type: 'boolean',
+				label: 'Use TypeScript',
+				convertToString: (v) => (v ? 'Use TypeScript' : 'Do not use TypeScript')
+			}
+		}
 	},
 	vue2: {
 		label: 'Vue 2',
@@ -103,14 +120,7 @@ export const queryOptions = {
 		lang: 'vue',
 		query: createQueryFn(
 			`Convert the following component to a Vue 3 component, using SFCs, template tags.`
-		),
-		params: {
-			API: {
-				type: 'string',
-				label: 'API',
-				values: ['Composition API', 'Options API']
-			}
-		}
+		)
 	},
 	angular: {
 		label: 'Angular',
@@ -144,7 +154,20 @@ export const queryOptions = {
 		label: 'Python',
 		icon: 'python',
 		lang: 'python',
-		query: createQueryFn(`Convert the following code to Python 3.`)
+		query: createQueryFn(`Convert the following code to Python.`),
+		params: {
+			version: {
+				type: 'string',
+				label: 'Python version',
+				values: ['Python 3', 'Python 2'],
+				convertToString: (v) => `Use ${v}`
+			},
+			useTypeHints: {
+				type: 'boolean',
+				label: 'Use type hints',
+				convertToString: (v) => (v ? 'Use type hints' : 'Do not use type hints')
+			}
+		}
 	},
 	javascript: {
 		label: 'JavaScript',
@@ -164,6 +187,6 @@ export const queryOptions = {
 		lang: 'rust',
 		query: createQueryFn(`Convert the following code to Rust.`)
 	}
-} satisfies Options;
+};
 
 export const languages = Object.values(queryOptions).map((o) => o.lang);

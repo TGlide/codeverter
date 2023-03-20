@@ -4,7 +4,7 @@
 	import Output from '$components/output.svelte';
 	import { objectKeys } from '$helpers/object';
 	import { fetchStream } from '$helpers/stream';
-	import { getParamsFromForm, queryOptions } from '$lib/query';
+	import { getParamsFromForm, hasParams, queryOptions } from '$lib/query';
 	import { key } from '$stores/key';
 	import Button from '$UI/button.svelte';
 	import Select from '$UI/select.svelte';
@@ -12,8 +12,8 @@
 	let optionKey = objectKeys(queryOptions)[0];
 	$: option = queryOptions[optionKey];
 
-	let useAdvanced = true;
-	const resetAdvanced = () => (useAdvanced = true);
+	let useAdvanced = false;
+	const resetAdvanced = () => (useAdvanced = false);
 	$: if (option) resetAdvanced();
 
 	enum ErrorCode {
@@ -36,7 +36,7 @@
 
 		const form = e.target as HTMLFormElement;
 		const params =
-			useAdvanced && 'params' in option ? getParamsFromForm(form, option.params) : undefined;
+			useAdvanced && hasParams(option) ? getParamsFromForm(form, option.params) : undefined;
 
 		try {
 			const response = await fetch('/api/generate', {
@@ -115,7 +115,7 @@
 		</div>
 
 		<!-- Advanced options -->
-		{#if 'params' in option}
+		{#if hasParams(option)}
 			<div
 				class="mt-8 flex items-center justify-center gap-2"
 				class:opacity-50={!useAdvanced}
@@ -127,7 +127,7 @@
 
 			{#if useAdvanced}
 				<div class="params-wrapper">
-					{#each objectKeys(option.params) as key}
+					{#each Object.keys(option.params) as key}
 						{@const param = option.params[key]}
 						<div
 							class="flex justify-start items-center gap-2"
