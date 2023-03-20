@@ -4,14 +4,14 @@
 	import Output from '$components/output.svelte';
 	import { objectKeys } from '$helpers/object';
 	import { fetchStream } from '$helpers/stream';
-	import { getParamsFromForm, hasParams, queryOptions } from '$lib/query';
+	import { getParamsFromForm, getQueryOption, hasParams, queryOptions } from '$lib/query';
 	import { key } from '$stores/key';
 	import Button from '$UI/button.svelte';
 	import Combobox from '$UI/combobox.svelte';
 	import Select from '$UI/select.svelte';
 
 	let optionKey = objectKeys(queryOptions)[0];
-	$: option = queryOptions[optionKey];
+	$: option = getQueryOption(optionKey);
 
 	let useAdvanced = false;
 	const resetAdvanced = () => (useAdvanced = false);

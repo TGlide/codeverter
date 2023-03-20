@@ -1,3 +1,4 @@
+import { isLang } from '$helpers/lang';
 import type { IconName } from '$UI/icon.svelte';
 import type { Lang } from 'shiki';
 
@@ -188,5 +189,19 @@ export const queryOptions: Options = {
 		query: createQueryFn(`Convert the following code to Rust.`)
 	}
 };
+
+export function getQueryOption(key: string): Option {
+	const option = queryOptions[key];
+	if (!option) {
+		const lowercaseKey = key.toLowerCase();
+		return {
+			label: key,
+			icon: 'copy',
+			lang: isLang(lowercaseKey) ? lowercaseKey : 'markdown',
+			query: createQueryFn(`Convert the following code to ${key}.`)
+		};
+	}
+	return option;
+}
 
 export const languages = Object.values(queryOptions).map((o) => o.lang);

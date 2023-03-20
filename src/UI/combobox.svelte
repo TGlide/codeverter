@@ -11,6 +11,7 @@
 	const getSelectedOption = (v: string) => options.find((o) => o.value === v || o.label === v);
 
 	// Variables
+	let icon = getSelectedOption(value)?.icon;
 	let input: string = getSelectedOption(value)?.label || '';
 	let dirty = false;
 	let hasFocus = false;
@@ -19,10 +20,25 @@
 	// Computed values
 	$: filteredOptions = ((): typeof options => {
 		if (!dirty) return [...options];
-		return options.filter((option) => option.label.toLowerCase().includes(input.toLowerCase()));
-	})();
+		const filtered = options.filter(({ label }) =>
+			label.toLowerCase().includes(input.toLowerCase())
+		);
 
-	$: icon = getSelectedOption(value)?.icon;
+		if (
+			input.trim().length === 0 ||
+			filtered.map(({ label }) => label.toLowerCase()).includes(input.toLowerCase())
+		) {
+			return filtered;
+		}
+
+		const createNewOption: (typeof options)[number] = {
+			value: input,
+			label: `Create "${input}"`,
+			icon: 'copy'
+		};
+
+		return [createNewOption, ...filtered];
+	})();
 
 	// Effects
 	$: {
@@ -37,10 +53,6 @@
 
 	$: if (hasFocus === true && !dirty) {
 		selectedIndex = filteredOptions.findIndex((option) => option.label === input);
-	}
-
-	$: if (hasFocus === false) {
-		input = getSelectedOption(value)?.label || '';
 	}
 
 	// Helpers
@@ -68,6 +80,19 @@
 		};
 	};
 
+	function selectOption(option?: (typeof options)[number]) {
+		if (option) {
+			input = option.label;
+			value = option.value;
+			icon = option.icon;
+		} else {
+			input = '';
+			value = '';
+			icon = undefined;
+		}
+		hasFocus = false;
+	}
+
 	function onKeydown(event: KeyboardEvent) {
 		hasFocus = true;
 
@@ -79,14 +104,13 @@
 			selectedIndex = (selectedIndex - 1 + filteredOptions.length) % filteredOptions.length;
 		} else if (event.key === 'Enter') {
 			event.preventDefault();
-			input = filteredOptions[selectedIndex]?.label || '';
-			value = getSelectedOption(input)?.value || '';
-			hasFocus = false;
+			const option = filteredOptions[selectedIndex];
+			selectOption(option);
 		}
 	}
 </script>
 
-<div class="relative" use:tooltip use:clickOutside={() => (hasFocus = false)}>
+<div class="relative z-10" use:tooltip use:clickOutside={() => (hasFocus = false)}>
 	{#if icon}
 		<div class="pointer-events-none absolute left-2 top-1/2 z-10 -translate-y-1/2">
 			<Icon name={icon} />
@@ -106,26 +130,20 @@
 		{#each filteredOptions as option, i}
 			<button
 				data-selected={i === selectedIndex}
-				on:click={() => {
-					input = option.label;
-					value = option.value;
-					hasFocus = false;
-				}}
+				on:click={() => selectOption(option)}
+				type="button"
 			>
 				<span>
 					{#if option.icon}
 						<Icon name={option.icon} />
 					{/if}
 				</span>
-				{option.label}
+				<span>
+					{option.label}
+				</span>
 			</button>
 		{/each}
 	</div>
-	<!-- <select class="input py-2 pr-2 pl-9 font-sans bg-black" bind:value>
-		{#each options as option}
-			<option value={option.value}>{option.label}</option>
-		{/each}
-	</select> -->
 </div>
 
 <style lang="postcss">
@@ -163,11 +181,22 @@
 			gap: theme('spacing.2');
 			padding: theme('spacing.2');
 			border-radius: theme('borderRadius.md');
+			text-align: left;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: clip;
 
 			&:hover,
 			&[data-selected='true'] {
 				background-color: theme('colors.zinc.800');
 				cursor: pointer;
+			}
+
+			span:nth-child(2) {
+				min-width: 0;
+				flex-shrink: 1;
+				overflow: hidden;
+				text-overflow: ellipsis;
 			}
 		}
 	}
