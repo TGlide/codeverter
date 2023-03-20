@@ -4,13 +4,17 @@
 	import Output from '$components/output.svelte';
 	import { objectKeys } from '$helpers/object';
 	import { fetchStream } from '$helpers/stream';
-	import { queryOptions } from '$lib/query';
+	import { getParamsFromForm, hasParams, queryOptions } from '$lib/query';
 	import { key } from '$stores/key';
 	import Button from '$UI/button.svelte';
 	import Select from '$UI/select.svelte';
 
-	let selected = objectKeys(queryOptions)[0];
-	$: lang = queryOptions[selected].lang;
+	let optionKey = objectKeys(queryOptions)[0];
+	$: option = queryOptions[optionKey];
+
+	let useAdvanced = false;
+	const resetAdvanced = () => (useAdvanced = false);
+	$: if (option) resetAdvanced();
 
 	enum ErrorCode {
 		NoKey = 'Set your API key',
@@ -21,18 +25,23 @@
 
 	let input = '';
 	let output = '';
+	$: optionKey && (output = '');
 	let settingsOpen = false;
 
-	async function search() {
+	async function search(e: SubmitEvent) {
 		if (loading || !input) return;
 		output = '';
 		error = null;
 		loading = true;
 
+		const form = e.target as HTMLFormElement;
+		const params =
+			useAdvanced && hasParams(option) ? getParamsFromForm(form, option.params) : undefined;
+
 		try {
 			const response = await fetch('/api/generate', {
 				method: 'POST',
-				body: JSON.stringify({ input, type: selected, key: $key }),
+				body: JSON.stringify({ input, type: optionKey, key: $key, params }),
 				headers: {
 					'content-type': 'application/json'
 				}
@@ -58,14 +67,20 @@
 	<meta name="description" content="Convert code to your programming language of choice" />
 </svelte:head>
 
-<main class="relative flex min-h-screen flex-col justify-between gap-4 overflow-hidden pb-8">
+<form
+	class="relative flex min-h-screen flex-col justify-between gap-4 overflow-hidden pb-8"
+	on:submit={search}
+>
 	<div class="bg" />
+
 	<div class="mx-auto w-full max-w-7xl px-2 lg:px-4">
+		<!-- Hero -->
 		<h1 class="mx-auto mt-16 max-w-5xl text-center text-3xl font-bold lg:text-5xl lg:leading-tight">
 			Convert <span class="gradient-text">code</span> to your programming
 			<span class="gradient-text">language</span> of choice
 		</h1>
 
+		<!-- Input and Output -->
 		<div class="mt-8 grid w-full gap-4 lg:grid-cols-2">
 			<div class="flex h-[20rem] flex-col lg:h-[40rem]">
 				<label for="input" class="font-semibold">Input</label>
@@ -77,33 +92,70 @@
 				/>
 			</div>
 			<div class="flex h-[20rem] flex-col lg:h-[40rem]">
-				<div class="flex justify-between items-center">
+				<div class="flex items-center justify-between">
 					<label for="output" class="font-semibold">Output</label>
 					{#if output}
 						<Copy value={output} />
 					{/if}
 				</div>
 
-				<Output value={output} {lang} />
+				<Output value={output} lang={option.lang} />
 			</div>
 		</div>
 
+		<!-- Button and Language selector -->
 		<div class="mt-8 flex items-center justify-center gap-4">
-			<Button {loading} disabled={!input.trim()} on:click={search}>Convert</Button>
+			<Button {loading} disabled={!input.trim()} type="submit">Convert</Button>
 			<span>to</span>
-			<Select bind:value={selected} icon={queryOptions[selected].icon}>
+			<Select bind:value={optionKey} icon={queryOptions[optionKey].icon}>
 				{#each objectKeys(queryOptions) as key}
 					<option value={key}>{queryOptions[key].label}</option>
 				{/each}
 			</Select>
 		</div>
 
+		<!-- Advanced options -->
+		{#if hasParams(option)}
+			<div
+				class="mt-8 flex items-center justify-center gap-2"
+				class:opacity-50={!useAdvanced}
+				class:opacity-100={useAdvanced}
+			>
+				<input type="checkbox" class="checkbox" id="advanced" bind:checked={useAdvanced} />
+				<label for="advanced" class="font-light">Use advanced options</label>
+			</div>
+
+			{#if useAdvanced}
+				<div class="params-wrapper">
+					{#each Object.keys(option.params) as key}
+						{@const param = option.params[key]}
+						<div
+							class="flex justify-start items-center gap-2"
+							class:flex-row-reverse={param.type === 'boolean'}
+							class:justify-end={param.type === 'boolean'}
+						>
+							<label for={key}>{param.label}</label>
+							{#if param.type === 'boolean'}
+								<input type="checkbox" name={key} id={key} />
+							{:else if param.type === 'string'}
+								<Select name={key}>
+									{#each param.values as value}
+										<option {value}>{value}</option>
+									{/each}
+								</Select>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			{/if}
+		{/if}
+
 		{#if error === ErrorCode.Generic}
 			<p class="mt-4 text-center text-red-500">{error}</p>
 		{/if}
 		{#if error === ErrorCode.NoKey}
 			<button
-				class="mt-4 mx-auto block text-red-500 underline hover:text-red-400"
+				class="mx-auto mt-4 block text-red-500 underline hover:text-red-400"
 				on:click={() => (settingsOpen = true)}
 			>
 				Set your API key
@@ -136,7 +188,7 @@
 			</a>
 		</p>
 	</footer>
-</main>
+</form>
 
 <Modal bind:open={settingsOpen} title="Settings">
 	<div class="flex flex-col gap-2">
@@ -178,5 +230,26 @@
 	:global(.shiki) {
 		background-color: transparent !important;
 		white-space: pre-wrap;
+	}
+
+	.params-wrapper {
+		@apply mx-auto;
+		display: grid;
+
+		gap: theme('spacing.4');
+
+		background-color: theme('colors.zinc.800');
+		/* border: 1px solid theme('colors.gray.500'); */
+		border-radius: theme('borderRadius.md');
+		padding: theme('spacing.4');
+
+		margin-top: theme('spacing.4');
+		max-width: theme('maxWidth.xs');
+	}
+
+	@media screen(lg) {
+		.params-wrapper {
+			grid-template-columns: repeat(1, minmax(0, 1fr));
+		}
 	}
 </style>

@@ -1,5 +1,6 @@
+import { get } from '$helpers/object';
 import { wordCount } from '$helpers/string';
-import { generateQuery, systemQuery } from '$lib/query';
+import { queryOptions, systemQuery } from '$lib/query';
 import { createParser, type ParseEvent } from 'eventsource-parser';
 
 interface OpenAIChatPayload {
@@ -110,9 +111,12 @@ async function OpenAIChatStream(search: string, key: string) {
 }
 
 export async function POST({ request }) {
-	const { input, type, key } = await request.json();
-	const query = generateQuery(input, type);
+	const { input, type, key, params } = await request.json();
+	const queryOption = get(queryOptions, type);
+	if (!queryOption) throw new Error('Invalid query type');
 
+	const query = queryOption.query(input, params);
+	console.log(query);
 	const stream = await OpenAIChatStream(query, key);
 
 	return new Response(stream);

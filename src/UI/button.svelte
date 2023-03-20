@@ -3,9 +3,10 @@
 
 	export let loading = false;
 	export let disabled = false;
+	export let type = 'button';
 </script>
 
-<button class="btn block relative" on:click disabled={disabled || loading}>
+<button class="btn block relative" on:click disabled={disabled || loading} {type}>
 	{#if loading}
 		<div class="spinner-wrapper">
 			<Icon name="spinner" />
