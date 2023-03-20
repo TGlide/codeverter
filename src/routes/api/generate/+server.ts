@@ -1,11 +1,12 @@
+import { get } from '$helpers/object';
 import { wordCount } from '$helpers/string';
-import { generateQuery } from '$lib/query';
+import { queryOptions, systemQuery } from '$lib/query';
 import { createParser, type ParseEvent } from 'eventsource-parser';
 
 interface OpenAIChatPayload {
 	model: string;
 	messages: Array<{
-		role: 'user';
+		role: 'user' | 'system' | 'agent';
 		content: string;
 	}>;
 	temperature: number;
@@ -20,6 +21,7 @@ async function OpenAIChatStream(search: string, key: string) {
 	const payload: OpenAIChatPayload = {
 		model: 'gpt-3.5-turbo',
 		messages: [
+			{ role: 'system', content: systemQuery },
 			{
 				role: 'user',
 				content: search
@@ -84,6 +86,7 @@ async function OpenAIChatStream(search: string, key: string) {
 							// this is a prefix character (i.e., "\n\n"), do nothing
 							return;
 						}
+
 						const queue = encoder.encode(text);
 						controller.enqueue(queue);
 						counter++;
@@ -108,9 +111,12 @@ async function OpenAIChatStream(search: string, key: string) {
 }
 
 export async function POST({ request }) {
-	const { input, type, key } = await request.json();
-	const query = generateQuery(input, type);
+	const { input, type, key, params } = await request.json();
+	const queryOption = get(queryOptions, type);
+	if (!queryOption) throw new Error('Invalid query type');
 
+	const query = queryOption.query(input, params);
+	console.log(query);
 	const stream = await OpenAIChatStream(query, key);
 
 	return new Response(stream);

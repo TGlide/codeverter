@@ -83,9 +83,12 @@ body {
 		padding: theme('padding.2');
 
 		&:focus {
-			border-color: theme('colors.orange.300');
 			outline: none;
-			@apply ring ring-orange-300;
+
+			&:not(:read-only) {
+				border-color: theme('colors.orange.300');
+				@apply ring ring-orange-300;
+			}
 		}
 	}
 
