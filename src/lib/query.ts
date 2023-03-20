@@ -36,12 +36,7 @@ Output the code directly, without explanation.`;
 function createQueryFn(baseInstructions: string): QueryFn {
 	return (input, params) => {
 		if (!params?.length) return baseInstructions + `\n\nHere's the code:\n${input}`;
-		return (
-			baseInstructions +
-			`\n\nUse the following parameters:\n` +
-			params.join('\n') +
-			`\n\nHere's the code:\n${input}`
-		);
+		return [baseInstructions, ...params, `\nHere's the code:\n${input}`].join('\n');
 	};
 }
 
@@ -51,9 +46,9 @@ export const queryOptions: Options = {
 		icon: 'svelte',
 		lang: 'svelte',
 		query: createQueryFn(`Convert the following component to a Svelte component.
-      Don't import useState, as Svelte does not have it.
-      If onMount is present, do not use onDestroy. Instead, return a cleanup function from onMount.
-      Do not use createRef.`),
+Don't import useState, as Svelte does not have it. Do not use createRef.
+Do not use markup inside the script tag. Do not use html tags inside the script tag.
+All markup should be outside the script tag.`),
 		params: {
 			useSvelteKit: {
 				type: 'boolean',
