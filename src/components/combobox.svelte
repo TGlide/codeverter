@@ -160,7 +160,7 @@
 		width: 100%;
 		top: 0;
 		left: 0;
-		max-height: theme('maxHeight.96');
+		max-height: theme('maxHeight.80');
 		overflow-y: scroll;
 		visibility: hidden;
 
@@ -179,12 +179,15 @@
 			display: flex;
 			align-items: center;
 			gap: theme('spacing.2');
+
 			padding: theme('spacing.2');
 			border-radius: theme('borderRadius.md');
 			text-align: left;
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: clip;
+
+			flex-shrink: 0;
 
 			&:hover,
 			&[data-selected='true'] {
