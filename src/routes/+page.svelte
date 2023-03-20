@@ -25,6 +25,7 @@
 
 	let input = '';
 	let output = '';
+	$: optionKey && (output = '');
 	let settingsOpen = false;
 
 	async function search(e: SubmitEvent) {
@@ -116,7 +117,8 @@
 		<!-- Advanced options -->
 		{#if 'params' in option}
 			<div
-				class="mt-8 flex items-center justify-center gap-2 opacity-50"
+				class="mt-8 flex items-center justify-center gap-2"
+				class:opacity-50={!useAdvanced}
 				class:opacity-100={useAdvanced}
 			>
 				<input type="checkbox" class="checkbox" id="advanced" bind:checked={useAdvanced} />
@@ -236,18 +238,18 @@
 
 		gap: theme('spacing.4');
 
-		background-color: theme('colors.gray.800/0.25');
-		border: 1px solid theme('colors.gray.500');
+		background-color: theme('colors.zinc.800');
+		/* border: 1px solid theme('colors.gray.500'); */
 		border-radius: theme('borderRadius.md');
 		padding: theme('spacing.4');
 
 		margin-top: theme('spacing.4');
-		max-width: theme('maxWidth.xl');
+		max-width: theme('maxWidth.xs');
 	}
 
 	@media screen(lg) {
 		.params-wrapper {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
+			grid-template-columns: repeat(1, minmax(0, 1fr));
 		}
 	}
 </style>

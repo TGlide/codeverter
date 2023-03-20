@@ -82,11 +82,6 @@ export const queryOptions = {
 			useTypeScript: {
 				type: 'boolean',
 				label: 'Use TypeScript'
-			},
-			stylingSolution: {
-				type: 'string',
-				label: 'Styling solution',
-				values: ['CSS', 'SCSS', 'PostCSS', 'Tailwind CSS']
 			}
 		}
 	},
@@ -106,9 +101,16 @@ export const queryOptions = {
 		label: 'Vue 3',
 		icon: 'vue',
 		lang: 'vue',
-		query:
-			createQueryFn(`Convert the following component to a Vue 3 component, using SFCs, template tags, and <script setup>.
-      Use refs for state, and defineProps for props (if needed). Do not use useState.`)
+		query: createQueryFn(
+			`Convert the following component to a Vue 3 component, using SFCs, template tags.`
+		),
+		params: {
+			API: {
+				type: 'string',
+				label: 'API',
+				values: ['Composition API', 'Options API']
+			}
+		}
 	},
 	angular: {
 		label: 'Angular',
