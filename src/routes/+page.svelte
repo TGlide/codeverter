@@ -7,7 +7,7 @@
 	import { getParamsFromForm, getQueryOption, hasParams, queryOptions } from '$lib/query';
 	import { key } from '$stores/key';
 	import Button from '$UI/button.svelte';
-	import Combobox from '$UI/combobox.svelte';
+	import Combobox from '$components/combobox.svelte';
 	import Select from '$UI/select.svelte';
 
 	let optionKey = objectKeys(queryOptions)[0];
@@ -36,8 +36,7 @@
 		loading = true;
 
 		const form = e.target as HTMLFormElement;
-		const params =
-			useAdvanced && hasParams(option) ? getParamsFromForm(form, option.params) : undefined;
+		const params = hasParams(option) ? getParamsFromForm(form, option.params) : undefined;
 
 		try {
 			const response = await fetch('/api/generate', {
@@ -243,7 +242,6 @@
 		gap: theme('spacing.4');
 
 		background-color: theme('colors.zinc.800');
-		/* border: 1px solid theme('colors.gray.500'); */
 		border-radius: theme('borderRadius.md');
 		padding: theme('spacing.4');
 

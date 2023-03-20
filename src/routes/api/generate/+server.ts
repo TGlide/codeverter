@@ -1,6 +1,5 @@
-import { get } from '$helpers/object';
 import { wordCount } from '$helpers/string';
-import { getQueryOption, queryOptions, systemQuery } from '$lib/query';
+import { getQueryOption, systemQuery } from '$lib/query';
 import { createParser, type ParseEvent } from 'eventsource-parser';
 
 interface OpenAIChatPayload {
@@ -39,18 +38,6 @@ async function OpenAIChatStream(search: string, key: string) {
 	const decoder = new TextDecoder();
 
 	let counter = 0;
-
-	// const testRes = await fetch('https://api.openai.com/v1/chat/completions', {
-	// 	headers: {
-	// 		'Content-Type': 'application/json',
-	// 		Authorization: `Bearer ${key}`
-	// 	},
-	// 	method: 'POST',
-	// 	body: JSON.stringify({ ...payload, stream: false })
-	// });
-
-	// const testJson = await testRes.json();
-	// console.log(testJson);
 
 	const res = await fetch('https://api.openai.com/v1/chat/completions', {
 		headers: {

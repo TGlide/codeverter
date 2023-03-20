@@ -190,7 +190,7 @@ const langs: Lang[] = [
 	'yaml',
 	'yml',
 	'zenscript'
-] as const;
+];
 
 export function isLang(lang: string): lang is Lang {
 	return langs.includes(lang as Lang);

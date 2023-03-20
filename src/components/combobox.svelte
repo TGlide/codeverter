@@ -2,8 +2,8 @@
 	import { clickOutside } from '$actions/clickOutside';
 	import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 	import type { Action } from 'svelte/action';
-	import type { IconName } from './icon.svelte';
-	import Icon from './icon.svelte';
+	import type { IconName } from '../UI/icon.svelte';
+	import Icon from '../UI/icon.svelte';
 
 	// Props
 	export let value: string;

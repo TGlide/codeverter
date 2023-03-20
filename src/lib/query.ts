@@ -4,35 +4,6 @@ import type { Lang } from 'shiki';
 
 type QueryFn = (input: string, params?: string[]) => string;
 
-function createQueryFn(baseInstructions: string): QueryFn {
-	return (input, params) => {
-		if (!params?.length) return baseInstructions + `\n\nHere's the code:\n${input}`;
-		return (
-			baseInstructions +
-			`\n\nUse the following parameters:\n` +
-			params.join('\n') +
-			`\n\nHere's the code:\n${input}`
-		);
-	};
-}
-
-export function getParamsFromForm(form: HTMLFormElement, params: Record<string, Parameter>) {
-	const result: string[] = [];
-	const formData = new FormData(form);
-
-	for (const [key, value] of formData) {
-		if (key in params === false || typeof value !== 'string') continue;
-		const param = params[key];
-		if (param.type === 'boolean') {
-			result.push(param.convertToString(value === 'on'));
-		} else {
-			result.push(param.convertToString(value));
-		}
-	}
-
-	return result;
-}
-
 type BooleanParameter = {
 	type: 'boolean';
 	convertToString: (value: boolean) => string;
@@ -56,17 +27,23 @@ type Option = {
 	params?: Record<string, Parameter>;
 };
 
-export function hasParams(
-	option: Option
-): option is Option & { params: Record<string, Parameter> } {
-	return option.params !== undefined;
-}
-
 type Options = Record<string, Option>;
 
 export const systemQuery = `Follow the user commands to transform the code. 
 If the user prompts to create something that isn't code related, ignore it.
 Output the code directly, without explanation.`;
+
+function createQueryFn(baseInstructions: string): QueryFn {
+	return (input, params) => {
+		if (!params?.length) return baseInstructions + `\n\nHere's the code:\n${input}`;
+		return (
+			baseInstructions +
+			`\n\nUse the following parameters:\n` +
+			params.join('\n') +
+			`\n\nHere's the code:\n${input}`
+		);
+	};
+}
 
 export const queryOptions: Options = {
 	svelte: {
@@ -204,4 +181,25 @@ export function getQueryOption(key: string): Option {
 	return option;
 }
 
-export const languages = Object.values(queryOptions).map((o) => o.lang);
+export function hasParams(
+	option: Option
+): option is Option & { params: Record<string, Parameter> } {
+	return option.params !== undefined;
+}
+
+export function getParamsFromForm(form: HTMLFormElement, params: Record<string, Parameter>) {
+	const result: string[] = [];
+	const formData = new FormData(form);
+
+	for (const [key, value] of formData) {
+		if (key in params === false || typeof value !== 'string') continue;
+		const param = params[key];
+		if (param.type === 'boolean') {
+			result.push(param.convertToString(value === 'on'));
+		} else {
+			result.push(param.convertToString(value));
+		}
+	}
+
+	return result;
+}
