@@ -1,33 +1,45 @@
 <script lang="ts">
+	import { clickOutside } from '$actions/clickOutside';
 	import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 	import type { Action } from 'svelte/action';
 	import type { IconName } from './icon.svelte';
 	import Icon from './icon.svelte';
 
+	// Props
 	export let value: string;
 	export let options: { value: string; label: string; icon?: IconName }[];
 	const getSelectedOption = (v: string) => options.find((o) => o.value === v || o.label === v);
 
+	// Variables
 	let input: string = getSelectedOption(value)?.label || '';
+	let dirty = false;
 	let hasFocus = false;
+	let selectedIndex = 0;
 
-	$: filteredOptions = options.filter((option) =>
-		option.label.toLowerCase().includes(input.toLowerCase())
-	);
-	$: {
-		filteredOptions;
-		selectedIndex = 0;
-	}
-
-	$: {
-		const inputOption = getSelectedOption(input);
-		if (inputOption) {
-			value = inputOption.value;
-		}
-	}
+	// Computed values
+	$: filteredOptions = ((): typeof options => {
+		if (!dirty) return [...options];
+		return options.filter((option) => option.label.toLowerCase().includes(input.toLowerCase()));
+	})();
 
 	$: icon = getSelectedOption(value)?.icon;
 
+	// Effects
+	$: {
+		hasFocus; // dependecies
+		dirty = false;
+	}
+
+	$: {
+		filteredOptions; // dependecies
+		selectedIndex = 0;
+	}
+
+	$: if (hasFocus === true && !dirty) {
+		selectedIndex = filteredOptions.findIndex((option) => option.label === input);
+	}
+
+	// Helpers
 	const tooltip: Action<HTMLDivElement> = (wrapperEl) => {
 		const suggestionsEl = wrapperEl.querySelector('.suggestions') as HTMLDivElement;
 
@@ -52,7 +64,6 @@
 		};
 	};
 
-	let selectedIndex = 0;
 	function onKeydown(event: KeyboardEvent) {
 		hasFocus = true;
 
@@ -65,12 +76,13 @@
 		} else if (event.key === 'Enter') {
 			event.preventDefault();
 			input = filteredOptions[selectedIndex]?.label || '';
+			value = getSelectedOption(input)?.value || '';
 			hasFocus = false;
 		}
 	}
 </script>
 
-<div class="relative" use:tooltip>
+<div class="relative" use:tooltip use:clickOutside={() => (hasFocus = false)}>
 	{#if icon}
 		<div class="pointer-events-none absolute left-2 top-1/2 z-10 -translate-y-1/2">
 			<Icon name={icon} />
@@ -81,6 +93,8 @@
 		type="text"
 		class="input font-sans py-2 pr-2 pl-9 w-48"
 		on:focus={() => (hasFocus = true)}
+		on:click={() => (hasFocus = true)}
+		on:input={() => (dirty = true)}
 		on:keydown={onKeydown}
 		bind:value={input}
 	/>
@@ -90,6 +104,7 @@
 				data-selected={i === selectedIndex}
 				on:click={() => {
 					input = option.label;
+					value = option.value;
 					hasFocus = false;
 				}}
 			>
@@ -111,23 +126,32 @@
 
 <style lang="postcss">
 	.suggestions {
-		position: absolute;
+		display: flex;
+		flex-direction: column;
+		gap: theme('spacing.1');
+
 		background-color: theme('colors.black');
 		border: 1px solid theme('colors.gray.500');
 		border-radius: theme('borderRadius.md');
 
+		position: absolute;
 		width: 100%;
 		top: 0;
 		left: 0;
+		max-height: theme('maxHeight.96');
+		overflow-y: scroll;
 		visibility: hidden;
 
 		padding: theme('spacing.2');
-	}
 
-	.suggestions {
-		display: flex;
-		flex-direction: column;
-		gap: theme('spacing.1');
+		@media screen(lg) {
+			max-height: initial;
+			overflow-y: initial;
+		}
+
+		&.hidden {
+			display: none;
+		}
 
 		button {
 			display: flex;
