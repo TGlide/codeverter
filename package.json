@@ -41,6 +41,7 @@
 	"dependencies": {
 		"@floating-ui/dom": "^1.2.4",
 		"@fontsource/inter": "^4.5.15",
+		"@vercel/analytics": "^0.1.11",
 		"eventsource-parser": "^0.1.0",
 		"shiki": "^0.14.1"
 	}

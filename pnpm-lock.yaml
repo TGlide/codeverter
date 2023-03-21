@@ -8,6 +8,7 @@ specifiers:
   '@sveltejs/kit': ^1.5.0
   '@typescript-eslint/eslint-plugin': ^5.45.0
   '@typescript-eslint/parser': ^5.45.0
+  '@vercel/analytics': ^0.1.11
   autoprefixer: ^10.4.7
   eslint: ^8.28.0
   eslint-config-prettier: ^8.5.0
@@ -31,6 +32,7 @@ specifiers:
 dependencies:
   '@floating-ui/dom': 1.2.4
   '@fontsource/inter': 4.5.15
+  '@vercel/analytics': 0.1.11
   eventsource-parser: 0.1.0
   shiki: 0.14.1
 
@@ -603,6 +605,12 @@ packages:
       '@typescript-eslint/types': 5.54.1
       eslint-visitor-keys: 3.3.0
     dev: true
+
+  /@vercel/analytics/0.1.11:
+    resolution: {integrity: sha512-mj5CPR02y0BRs1tN3oZcBNAX9a8NxsIUl9vElDPcqxnMfP0RbRc9fI9Ud7+QDg/1Izvt5uMumsr+6YsmVHcyuw==}
+    peerDependencies:
+      react: ^16.8||^17||^18
+    dev: false
 
   /acorn-jsx/5.3.2_acorn@8.8.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
