@@ -20,7 +20,17 @@
 
 <style lang="postcss">
 	select {
-		@apply relative rounded-md border border-solid border-gray-500 bg-black py-2 pr-2 pl-2 focus:border-orange-300 focus:outline-none focus:ring focus:ring-orange-300;
+		position: relative;
+		border: 1px solid theme('colors.gray.500');
+		border-radius: theme('borderRadius.md');
+		background-color: theme('colors.black');
+
+		padding: 0.5rem;
+		outline: none;
+
+		&:focus {
+			@apply border-orange-300 ring ring-orange-300;
+		}
 	}
 
 	[data-has-icon='true'] {

@@ -1,9 +1,10 @@
 import { wordCount } from '$helpers/string';
 import { getQueryOption, systemQuery } from '$lib/query';
+import type { GPT } from '$stores/gpt';
 import { createParser, type ParseEvent } from 'eventsource-parser';
 
 interface OpenAIChatPayload {
-	model: string;
+	model: GPT;
 	messages: Array<{
 		role: 'user' | 'system' | 'agent';
 		content: string;
@@ -16,9 +17,15 @@ interface OpenAIChatPayload {
 	n: number;
 }
 
-async function OpenAIChatStream(search: string, key: string) {
+type OpenAIChatStreamParams = {
+	search: string;
+	key: string;
+	model: GPT;
+};
+
+async function OpenAIChatStream({ search, key, model }: OpenAIChatStreamParams) {
 	const payload: OpenAIChatPayload = {
-		model: 'gpt-3.5-turbo',
+		model,
 		messages: [
 			{ role: 'system', content: systemQuery },
 			{
@@ -98,13 +105,13 @@ async function OpenAIChatStream(search: string, key: string) {
 }
 
 export async function POST({ request }) {
-	const { input, type, key, params } = await request.json();
+	const { input, type, key, params, model } = await request.json();
 	const queryOption = getQueryOption(type);
 	if (!queryOption) throw new Error('Invalid query type');
 
 	const query = queryOption.query(input, params);
 	console.log(query);
-	const stream = await OpenAIChatStream(query, key);
+	const stream = await OpenAIChatStream({ search: query, key, model });
 
 	return new Response(stream);
 }
