@@ -9,6 +9,7 @@
 	import Button from '$UI/button.svelte';
 	import Combobox from '$components/combobox.svelte';
 	import Select from '$UI/select.svelte';
+	import { GPT, gpt } from '$stores/gpt';
 
 	let optionKey = objectKeys(queryOptions)[0];
 	$: option = getQueryOption(optionKey);
@@ -41,7 +42,7 @@
 		try {
 			const response = await fetch('/api/generate', {
 				method: 'POST',
-				body: JSON.stringify({ input, type: optionKey, key: $key, params }),
+				body: JSON.stringify({ input, type: optionKey, key: $key, params, model: $gpt }),
 				headers: {
 					'content-type': 'application/json'
 				}
@@ -160,6 +161,7 @@
 			<button
 				class="mx-auto mt-4 block text-red-500 underline hover:text-red-400"
 				on:click={() => (settingsOpen = true)}
+				type="button"
 			>
 				Set your API key
 			</button>
@@ -178,8 +180,12 @@
 		</p>
 		<p class="mt-1 text-sm text-gray-500">Warning: Code conversions may not be accurate.</p>
 		<p class="text-sm text-gray-500">
-			<button class="underline hover:text-gray-400" on:click={() => (settingsOpen = true)}>
-				Manage API key
+			<button
+				type="button"
+				class="underline hover:text-gray-400"
+				on:click={() => (settingsOpen = true)}
+			>
+				Settings
 			</button>
 			-
 			<a
@@ -195,6 +201,20 @@
 
 <Modal bind:open={settingsOpen} title="Settings">
 	<div class="flex flex-col gap-2">
+		<label class="font-semibold" for="api-key">GPT version: </label>
+		<Select bind:value={$gpt}>
+			<option value={GPT['three-dot-five']}>GPT 3.5-turbo</option>
+			<option value={GPT.four}>GPT 4</option>
+		</Select>
+	</div>
+
+	{#if $gpt === GPT.four}
+		<p class="border-l-2 border-orange-500  text-orange-200 text-sm py-1 px-2 mt-2" role="alert">
+			Make sure your API key has access to GPT-4. It is currently behind a waitlist.
+		</p>
+	{/if}
+
+	<div class="flex flex-col gap-2 mt-4">
 		<label class="font-semibold" for="api-key">API key: </label>
 		<input class="input px-2 py-2" type="password" id="api-key" bind:value={$key} />
 	</div>
