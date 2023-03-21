@@ -4,13 +4,14 @@
 	import Output from '$components/output.svelte';
 	import { objectKeys } from '$helpers/object';
 	import { fetchStream } from '$helpers/stream';
-	import { getParamsFromForm, hasParams, queryOptions } from '$lib/query';
+	import { getParamsFromForm, getQueryOption, hasParams, queryOptions } from '$lib/query';
 	import { key } from '$stores/key';
 	import Button from '$UI/button.svelte';
+	import Combobox from '$components/combobox.svelte';
 	import Select from '$UI/select.svelte';
 
 	let optionKey = objectKeys(queryOptions)[0];
-	$: option = queryOptions[optionKey];
+	$: option = getQueryOption(optionKey);
 
 	let useAdvanced = false;
 	const resetAdvanced = () => (useAdvanced = false);
@@ -35,8 +36,7 @@
 		loading = true;
 
 		const form = e.target as HTMLFormElement;
-		const params =
-			useAdvanced && hasParams(option) ? getParamsFromForm(form, option.params) : undefined;
+		const params = hasParams(option) ? getParamsFromForm(form, option.params) : undefined;
 
 		try {
 			const response = await fetch('/api/generate', {
@@ -107,11 +107,14 @@
 		<div class="mt-8 flex items-center justify-center gap-4">
 			<Button {loading} disabled={!input.trim()} type="submit">Convert</Button>
 			<span>to</span>
-			<Select bind:value={optionKey} icon={queryOptions[optionKey].icon}>
-				{#each objectKeys(queryOptions) as key}
-					<option value={key}>{queryOptions[key].label}</option>
-				{/each}
-			</Select>
+			<Combobox
+				bind:value={optionKey}
+				options={Object.entries(queryOptions).map(([key, { label, icon }]) => ({
+					value: key,
+					label,
+					icon
+				}))}
+			/>
 		</div>
 
 		<!-- Advanced options -->
@@ -239,7 +242,6 @@
 		gap: theme('spacing.4');
 
 		background-color: theme('colors.zinc.800');
-		/* border: 1px solid theme('colors.gray.500'); */
 		border-radius: theme('borderRadius.md');
 		padding: theme('spacing.4');
 

@@ -44,6 +44,7 @@
 		width: 100%;
 		height: 100%;
 		background-color: theme('colors.black/0.5');
+		z-index: theme('zIndex.50');
 
 		display: grid;
 		place-items: center;

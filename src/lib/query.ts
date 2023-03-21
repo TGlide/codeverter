@@ -1,36 +1,8 @@
+import { isLang } from '$helpers/lang';
 import type { IconName } from '$UI/icon.svelte';
 import type { Lang } from 'shiki';
 
 type QueryFn = (input: string, params?: string[]) => string;
-
-function createQueryFn(baseInstructions: string): QueryFn {
-	return (input, params) => {
-		if (!params?.length) return baseInstructions + `\n\nHere's the code:\n${input}`;
-		return (
-			baseInstructions +
-			`\n\nUse the following parameters:\n` +
-			params.join('\n') +
-			`\n\nHere's the code:\n${input}`
-		);
-	};
-}
-
-export function getParamsFromForm(form: HTMLFormElement, params: Record<string, Parameter>) {
-	const result: string[] = [];
-	const formData = new FormData(form);
-
-	for (const [key, value] of formData) {
-		if (key in params === false || typeof value !== 'string') continue;
-		const param = params[key];
-		if (param.type === 'boolean') {
-			result.push(param.convertToString(value === 'on'));
-		} else {
-			result.push(param.convertToString(value));
-		}
-	}
-
-	return result;
-}
 
 type BooleanParameter = {
 	type: 'boolean';
@@ -55,17 +27,18 @@ type Option = {
 	params?: Record<string, Parameter>;
 };
 
-export function hasParams(
-	option: Option
-): option is Option & { params: Record<string, Parameter> } {
-	return option.params !== undefined;
-}
-
 type Options = Record<string, Option>;
 
 export const systemQuery = `Follow the user commands to transform the code. 
 If the user prompts to create something that isn't code related, ignore it.
 Output the code directly, without explanation.`;
+
+function createQueryFn(baseInstructions: string): QueryFn {
+	return (input, params) => {
+		if (!params?.length) return baseInstructions + `\n\nHere's the code:\n${input}`;
+		return [baseInstructions, ...params, `\nHere's the code:\n${input}`].join('\n');
+	};
+}
 
 export const queryOptions: Options = {
 	svelte: {
@@ -73,9 +46,9 @@ export const queryOptions: Options = {
 		icon: 'svelte',
 		lang: 'svelte',
 		query: createQueryFn(`Convert the following component to a Svelte component.
-      Don't import useState, as Svelte does not have it.
-      If onMount is present, do not use onDestroy. Instead, return a cleanup function from onMount.
-      Do not use createRef.`),
+Don't import useState, as Svelte does not have it. Do not use createRef.
+Do not use markup inside the script tag. Do not use html tags inside the script tag.
+All markup should be outside the script tag.`),
 		params: {
 			useSvelteKit: {
 				type: 'boolean',
@@ -189,4 +162,39 @@ export const queryOptions: Options = {
 	}
 };
 
-export const languages = Object.values(queryOptions).map((o) => o.lang);
+export function getQueryOption(key: string): Option {
+	const option = queryOptions[key];
+	if (!option) {
+		const lowercaseKey = key.toLowerCase();
+		return {
+			label: key,
+			icon: 'copy',
+			lang: isLang(lowercaseKey) ? lowercaseKey : 'markdown',
+			query: createQueryFn(`Convert the following code to ${key}.`)
+		};
+	}
+	return option;
+}
+
+export function hasParams(
+	option: Option
+): option is Option & { params: Record<string, Parameter> } {
+	return option.params !== undefined;
+}
+
+export function getParamsFromForm(form: HTMLFormElement, params: Record<string, Parameter>) {
+	const result: string[] = [];
+	const formData = new FormData(form);
+
+	for (const [key, value] of formData) {
+		if (key in params === false || typeof value !== 'string') continue;
+		const param = params[key];
+		if (param.type === 'boolean') {
+			result.push(param.convertToString(value === 'on'));
+		} else {
+			result.push(param.convertToString(value));
+		}
+	}
+
+	return result;
+}

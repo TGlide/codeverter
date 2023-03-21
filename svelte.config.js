@@ -24,7 +24,8 @@ const config = {
 			$stores: './src/stores',
 			$routes: './src/routes',
 			$helpers: './src/helpers',
-			$UI: './src/UI'
+			$UI: './src/UI',
+			$actions: './src/actions'
 		}
 	}
 };

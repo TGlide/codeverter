@@ -3,7 +3,7 @@
 
 	export let loading = false;
 	export let disabled = false;
-	export let type = 'button';
+	export let type: 'button' | 'reset' | 'submit' | null | undefined = 'button';
 </script>
 
 <button class="btn block relative" on:click disabled={disabled || loading} {type}>

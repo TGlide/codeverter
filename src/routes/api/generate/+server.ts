@@ -1,6 +1,5 @@
-import { get } from '$helpers/object';
 import { wordCount } from '$helpers/string';
-import { queryOptions, systemQuery } from '$lib/query';
+import { getQueryOption, systemQuery } from '$lib/query';
 import { createParser, type ParseEvent } from 'eventsource-parser';
 
 interface OpenAIChatPayload {
@@ -27,7 +26,7 @@ async function OpenAIChatStream(search: string, key: string) {
 				content: search
 			}
 		],
-		temperature: 0,
+		temperature: 0.5,
 		max_tokens: 3500 - wordCount(search) * 2,
 		frequency_penalty: 0.0,
 		stream: true,
@@ -39,18 +38,6 @@ async function OpenAIChatStream(search: string, key: string) {
 	const decoder = new TextDecoder();
 
 	let counter = 0;
-
-	// const testRes = await fetch('https://api.openai.com/v1/chat/completions', {
-	// 	headers: {
-	// 		'Content-Type': 'application/json',
-	// 		Authorization: `Bearer ${key}`
-	// 	},
-	// 	method: 'POST',
-	// 	body: JSON.stringify({ ...payload, stream: false })
-	// });
-
-	// const testJson = await testRes.json();
-	// console.log(testJson);
 
 	const res = await fetch('https://api.openai.com/v1/chat/completions', {
 		headers: {
@@ -112,7 +99,7 @@ async function OpenAIChatStream(search: string, key: string) {
 
 export async function POST({ request }) {
 	const { input, type, key, params } = await request.json();
-	const queryOption = get(queryOptions, type);
+	const queryOption = getQueryOption(type);
 	if (!queryOption) throw new Error('Invalid query type');
 
 	const query = queryOption.query(input, params);

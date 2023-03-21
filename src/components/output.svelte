@@ -19,8 +19,6 @@
 		try {
 			return highlighter.codeToHtml(withoutCodeQuotes(value), { lang });
 		} catch (e) {
-			// we can't highlight the code
-			console.log(e);
 			return null;
 		}
 	})();
@@ -34,7 +32,6 @@
 	});
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <div class="relative mt-2 grid w-full grow overflow-hidden">
 	{#if htmlValue}
 		<div class="textarea overflow-auto">
