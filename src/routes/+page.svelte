@@ -219,7 +219,7 @@
 		<input class="input px-2 py-2" type="password" id="api-key" bind:value={$key} />
 	</div>
 
-	<p class="mt-4 text-sm text-gray-300">
+	<p class="mt-2 text-sm text-gray-300">
 		Get your free API key <a
 			class="underline hover:opacity-75"
 			href="https://platform.openai.com/account/api-keys"
