@@ -12,7 +12,6 @@ interface OpenAIChatPayload {
 	temperature: number;
 	frequency_penalty: number;
 	presence_penalty: number;
-	max_tokens: number;
 	stream: boolean;
 	n: number;
 }
@@ -34,7 +33,6 @@ async function OpenAIChatStream({ search, key, model }: OpenAIChatStreamParams) 
 			}
 		],
 		temperature: 0.5,
-		max_tokens: 3500 - wordCount(search) * 2,
 		frequency_penalty: 0.0,
 		stream: true,
 		presence_penalty: 0.0,

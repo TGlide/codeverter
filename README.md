@@ -14,18 +14,18 @@
 
 ## Description
 
-An OpenAI-powered code converter. It's a work in progress, but you can try it out [here](https://codeverter.vercel.app/).
+A GPT-powered code converter, allowing you to convert between different languages and frameworks, with a set of predefined custom options per language, without having to specify the input language.
+
+You can try it out [here](https://codeverter.vercel.app/).
 
 ## TODO
 
-- [ ] Add more languages
-- [ ] Swap select for autocomplete
-- [ ] Better token handling
 - [ ] Progressive enhancement
+- [x] Add ability to enter custom languages
+- [x] Swap select for autocomplete
 - [x] Code highlighting
 
 ## Ideas
 
-- [ ] OAuth/Email auth to allow free users to save their code
 - [ ] Code preview
-- [ ] Add custom options for each language
+- [x] Add custom options for each language
